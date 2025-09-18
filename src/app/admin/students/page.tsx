@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useStudentsMaterials } from '@/hooks/useStudentsMaterials'
 import { Navigation } from '@/components/Navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,9 @@ import {
   Eye, 
   Calendar,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  Download,
+  FileText
 } from 'lucide-react'
 
 interface StudentMaterial {
@@ -34,12 +37,20 @@ interface StudentMaterial {
 export default function AdminStudentsPage() {
   const { role } = useAuth()
   const router = useRouter()
-  const [materials, setMaterials] = useState<StudentMaterial[]>([])
-  const [filteredMaterials, setFilteredMaterials] = useState<StudentMaterial[]>([])
+  const { materials, loading, updateMaterial, deleteMaterial } = useStudentsMaterials()
+  const [filteredMaterials, setFilteredMaterials] = useState(materials)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('all')
-  const [loading, setLoading] = useState(true)
 
+  // Функция для скачивания файлов
+  const handleDownloadClick = (fileName: string, fileUrl: string) => {
+    const link = document.createElement('a')
+    link.href = fileUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
   // Проверка прав доступа
   useEffect(() => {
     if (role !== 'admin') {
@@ -58,45 +69,16 @@ export default function AdminStudentsPage() {
     )
   }
 
-  // Получение материалов для студентов
-  useEffect(() => {
-    const fetchMaterials = async () => {
+  // Функция для удаления материала
+  const handleDeleteMaterial = async (materialId: string) => {
+    if (confirm('Материалды жоюға сенімдісіз бе?')) {
       try {
-        // Здесь будет запрос к Supabase для получения материалов для студентов
-        // Пока используем заглушку
-        const mockMaterials: StudentMaterial[] = [
-          {
-            id: '1',
-            title: 'Биология негіздері',
-            description: 'Жасуша құрылымы және функциялары туралы негізгі түсініктер',
-            image_url: '/api/placeholder/300/200',
-            class_level: 9,
-            created_at: '2024-01-15',
-            files: ['biology_basics.pdf'],
-            external_links: ['https://example.com/biology']
-          },
-          {
-            id: '2',
-            title: 'Химиялық реакциялар',
-            description: 'Химиялық реакциялардың түрлері мен заңдылықтары',
-            image_url: '/api/placeholder/300/200',
-            class_level: 10,
-            created_at: '2024-01-20',
-            files: ['chemistry_reactions.pdf'],
-            external_links: ['https://example.com/chemistry']
-          }
-        ]
-        setMaterials(mockMaterials)
-        setFilteredMaterials(mockMaterials)
+        await deleteMaterial(materialId)
       } catch (error) {
-        console.error('Error fetching student materials:', error)
-      } finally {
-        setLoading(false)
+        console.error('Error deleting material:', error)
       }
     }
-
-    fetchMaterials()
-  }, [])
+  }
 
   // Фильтрация материалов
   useEffect(() => {
@@ -242,35 +224,62 @@ export default function AdminStudentsPage() {
                     <p className="text-gray-600 text-sm line-clamp-3">
                       {material.description}
                     </p>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(material.created_at).toLocaleDateString('kk-KZ')}
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(material.created_at).toLocaleDateString('kk-KZ')}
+                      </div>
+                      <div className="flex items-center">
+                        <FileText className="h-3 w-3 mr-1" />
+                        {material.files?.length || 0} файл
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between pt-2">
+
+
+                    {/* Список файлов */}
+                    {material.files && material.files.length > 0 && (
+                      <div className="space-y-1">
+                        {material.files.map((file, index) => {
+                          // Извлекаем имя файла из URL
+                          const fileName = file.split('/').pop() || `Файл ${index + 1}`
+                          return (
+                            <div 
+                              key={index} 
+                              className="flex items-center justify-between text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded cursor-pointer transition-colors"
+                              onClick={() => handleDownloadClick(fileName, file)}
+                            >
+                              <div className="flex items-center flex-1 mr-2">
+                                <FileText className="h-3 w-3 mr-1 text-gray-500" />
+                                <span className="truncate">{fileName}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <Download className="h-3 w-3 text-gray-500" />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+
+                    {/* Админ действия */}
+                    <div className="flex items-center justify-between pt-2 border-t">
                       <div className="flex items-center text-xs text-gray-500">
                         <GraduationCap className="h-3 w-3 mr-1" />
                         Студент материалдары
                       </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
+                      <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
                           variant="outline"
-                          onClick={() => handleView(material.id)}
-                        >
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(material.id)}
+                          onClick={() => router.push(`/admin/students/${material.id}/edit`)}
                         >
                           <Edit className="h-3 w-3" />
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(material.id)}
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
                           className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteMaterial(material.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -283,6 +292,7 @@ export default function AdminStudentsPage() {
           </div>
         )}
       </main>
+
     </div>
   )
 }

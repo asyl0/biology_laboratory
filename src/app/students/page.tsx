@@ -7,69 +7,28 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useLabs } from '@/hooks/useLabs'
+import { useStudentsMaterials } from '@/hooks/useStudentsMaterials'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Search, Filter, BookOpen, Calendar, GraduationCap } from 'lucide-react'
-
-interface StudentMaterial {
-  id: string
-  title: string
-  description: string
-  image_url?: string
-  class_level: number
-  created_at: string
-  files?: string[]
-  external_links?: string[]
-}
+import { Navigation } from '@/components/Navigation'
+import { Search, Filter, BookOpen, Calendar, GraduationCap, Download, FileText } from 'lucide-react'
 
 export default function StudentsPage() {
   const router = useRouter()
   const { t } = useLanguage()
-  const [materials, setMaterials] = useState<StudentMaterial[]>([])
-  const [filteredMaterials, setFilteredMaterials] = useState<StudentMaterial[]>([])
+  const { materials, loading, updateMaterial } = useStudentsMaterials()
+  const [filteredMaterials, setFilteredMaterials] = useState(materials)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('all')
-  const [loading, setLoading] = useState(true)
 
-  // Получаем материалы для студентов из базы данных
-  useEffect(() => {
-    const fetchMaterials = async () => {
-      try {
-        // Здесь будет запрос к Supabase для получения материалов для студентов
-        // Пока используем заглушку
-        const mockMaterials: StudentMaterial[] = [
-          {
-            id: '1',
-            title: 'Биология негіздері',
-            description: 'Жасуша құрылымы және функциялары туралы негізгі түсініктер',
-            image_url: '/api/placeholder/300/200',
-            class_level: 9,
-            created_at: '2024-01-15',
-            files: ['biology_basics.pdf'],
-            external_links: ['https://example.com/biology']
-          },
-          {
-            id: '2',
-            title: 'Химиялық реакциялар',
-            description: 'Химиялық реакциялардың түрлері мен заңдылықтары',
-            image_url: '/api/placeholder/300/200',
-            class_level: 10,
-            created_at: '2024-01-20',
-            files: ['chemistry_reactions.pdf'],
-            external_links: ['https://example.com/chemistry']
-          }
-        ]
-        setMaterials(mockMaterials)
-        setFilteredMaterials(mockMaterials)
-      } catch (error) {
-        console.error('Error fetching student materials:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchMaterials()
-  }, [])
+  // Функция для скачивания файлов
+  const handleDownloadClick = (fileName: string, fileUrl: string) => {
+    const link = document.createElement('a')
+    link.href = fileUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   // Фильтрация материалов
   useEffect(() => {
@@ -89,10 +48,6 @@ export default function StudentsPage() {
     setFilteredMaterials(filtered)
   }, [materials, searchTerm, selectedClass])
 
-  const handleMaterialClick = (id: string) => {
-    router.push(`/students/${id}`)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -106,6 +61,7 @@ export default function StudentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
         {/* Заголовок */}
         <div className="mb-8">
@@ -167,8 +123,7 @@ export default function StudentsPage() {
             {filteredMaterials.map((material) => (
               <Card 
                 key={material.id} 
-                className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                onClick={() => handleMaterialClick(material.id)}
+                className="hover:shadow-lg transition-shadow duration-200"
               >
                 <CardHeader className="p-0">
                   {material.image_url ? (
@@ -198,26 +153,50 @@ export default function StudentsPage() {
                     <p className="text-gray-600 text-sm line-clamp-3">
                       {material.description}
                     </p>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(material.created_at).toLocaleDateString('kk-KZ')}
-                    </div>
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center text-xs text-gray-500">
-                        <GraduationCap className="h-3 w-3 mr-1" />
-                        Студент материалдары
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(material.created_at).toLocaleDateString('kk-KZ')}
                       </div>
-                      <Button size="sm" variant="outline">
-                        Ашу
-                      </Button>
+                      <div className="flex items-center">
+                        <FileText className="h-3 w-3 mr-1" />
+                        {material.files?.length || 0} файл
+                      </div>
                     </div>
-                  </div>
+
+
+                      {/* Список файлов */}
+                      {material.files && material.files.length > 0 && (
+                        <div className="space-y-1">
+                          {material.files.map((file, index) => {
+                            // Извлекаем имя файла из URL
+                            const fileName = file.split('/').pop() || `Файл ${index + 1}`
+                            return (
+                              <div 
+                                key={index} 
+                                className="flex items-center justify-between text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded cursor-pointer transition-colors"
+                                onClick={() => handleDownloadClick(fileName, file)}
+                              >
+                                <div className="flex items-center flex-1 mr-2">
+                                  <FileText className="h-3 w-3 mr-1 text-gray-500" />
+                                  <span className="truncate">{fileName}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Download className="h-3 w-3 text-gray-500" />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
     </div>
   )
 }

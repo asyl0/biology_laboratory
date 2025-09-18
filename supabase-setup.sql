@@ -54,7 +54,31 @@ CREATE TABLE teachers_materials (
   description TEXT NOT NULL,
   description_kz TEXT,
   files TEXT[],
+  image_url TEXT,
+  theory TEXT,
+  process TEXT,
+  video_url TEXT,
+  external_links TEXT[],
   class_level INTEGER CHECK (class_level >= 7 AND class_level <= 11),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_by UUID REFERENCES auth.users(id) ON DELETE CASCADE
+);
+
+-- Создание таблицы материалов для учеников
+CREATE TABLE students_materials (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  title_kz TEXT,
+  description TEXT NOT NULL,
+  description_kz TEXT,
+  theory TEXT,
+  process TEXT,
+  image_url TEXT,
+  video_url TEXT,
+  external_links TEXT[],
+  files TEXT[],
+  class_level INTEGER NOT NULL CHECK (class_level >= 7 AND class_level <= 11),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id) ON DELETE CASCADE
@@ -65,6 +89,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE labs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE steam ENABLE ROW LEVEL SECURITY;
 ALTER TABLE teachers_materials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE students_materials ENABLE ROW LEVEL SECURITY;
 
 -- Политики для profiles
 CREATE POLICY "Users can view own profile" ON profiles
@@ -86,6 +111,10 @@ CREATE POLICY "Anyone can view steam" ON steam
 
 -- Политики для teachers_materials (все пользователи могут читать)
 CREATE POLICY "Anyone can view teachers_materials" ON teachers_materials
+  FOR SELECT USING (true);
+
+-- Политики для students_materials (все пользователи могут читать)
+CREATE POLICY "Anyone can view students_materials" ON students_materials
   FOR SELECT USING (true);
 
 -- Политики для админов (полный доступ)
@@ -126,6 +155,15 @@ CREATE POLICY "Admins can manage steam" ON steam
   );
 
 CREATE POLICY "Admins can manage teachers_materials" ON teachers_materials
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE user_id = auth.uid() 
+      AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can manage students_materials" ON students_materials
   FOR ALL USING (
     EXISTS (
       SELECT 1 FROM profiles 

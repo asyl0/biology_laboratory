@@ -64,9 +64,9 @@ export default function Home() {
             <Card className="text-center">
               <CardHeader>
                 <FlaskConical className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle>{t('home.features.labs.title')}</CardTitle>
+                <CardTitle>Биология зертханасы</CardTitle>
                 <CardDescription>
-                  {t('home.features.labs.description')}
+                  Интерактивті зертханалық жұмыстар мен эксперименттер
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -74,9 +74,9 @@ export default function Home() {
             <Card className="text-center">
               <CardHeader>
                 <Atom className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle>{t('home.features.steam.title')}</CardTitle>
+                <CardTitle>Ғылыми әдістер</CardTitle>
                 <CardDescription>
-                  {t('home.features.steam.description')}
+                  Зерттеу дағдылары мен ғылыми тұрғыдан ойлау
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -84,9 +84,9 @@ export default function Home() {
             <Card className="text-center">
               <CardHeader>
                 <GraduationCap className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle>{t('home.features.teachers.title')}</CardTitle>
+                <CardTitle>Білім беру ресурстары</CardTitle>
                 <CardDescription>
-                  {t('home.features.teachers.description')}
+                  Мұғалімдер мен оқушыларға арналған материалдар
                 </CardDescription>
               </CardHeader>
             </Card>

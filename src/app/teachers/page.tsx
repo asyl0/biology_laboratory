@@ -14,14 +14,25 @@ import {
   Search, 
   Calendar,
   User,
-  Eye
+  Download,
+  FileText
 } from 'lucide-react'
 
 export default function TeachersPage() {
   const { user, role } = useAuth()
-  const { teachersMaterials, loading } = useTeachersMaterials()
+  const { teachersMaterials, loading, updateMaterial } = useTeachersMaterials()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('all')
+
+  // Функция для скачивания файлов
+  const handleDownloadClick = (fileName: string, fileUrl: string) => {
+    const link = document.createElement('a')
+    link.href = fileUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   // Фильтрация материалов учителей
   const filteredMaterials = (teachersMaterials || []).filter(material => {
@@ -160,8 +171,7 @@ export default function TeachersPage() {
           {filteredMaterials.map((material) => (
             <Card 
               key={material.id} 
-              className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-              onClick={() => window.location.href = `/teachers/${material.id}`}
+              className="hover:shadow-lg transition-shadow duration-200"
             >
               <div className="aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
                 {material.image_url ? (
@@ -188,16 +198,42 @@ export default function TeachersPage() {
                   {material.description}
                 </p>
                 
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
                   <div className="flex items-center space-x-1">
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(material.created_at).toLocaleDateString('kk-KZ')}</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <User className="h-4 w-4" />
-                    <span>{material.files.length} файл</span>
+                    <FileText className="h-4 w-4" />
+                    <span>{material.files?.length || 0} файл</span>
                   </div>
                 </div>
+
+
+                  {/* Список файлов */}
+                  {material.files && material.files.length > 0 && (
+                    <div className="space-y-1">
+                      {material.files.map((file, index) => {
+                        // Извлекаем имя файла из URL
+                        const fileName = file.split('/').pop() || `Файл ${index + 1}`
+                        return (
+                          <div 
+                            key={index} 
+                            className="flex items-center justify-between text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded cursor-pointer transition-colors"
+                            onClick={() => handleDownloadClick(fileName, file)}
+                          >
+                            <div className="flex items-center flex-1 mr-2">
+                              <FileText className="h-3 w-3 mr-1 text-gray-500" />
+                              <span className="truncate">{fileName}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Download className="h-3 w-3 text-gray-500" />
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
               </CardContent>
             </Card>
           ))}
@@ -220,6 +256,7 @@ export default function TeachersPage() {
           </Card>
         )}
       </main>
+
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -28,10 +28,11 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
 
   // Редирект если уже авторизован
-  if (user) {
-    router.push('/dashboard')
-    return null
-  }
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard')
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,6 +94,15 @@ export default function RegisterPage() {
       ...prev,
       [field]: value
     }))
+  }
+
+  // Показываем загрузку если пользователь уже авторизован
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
   return (

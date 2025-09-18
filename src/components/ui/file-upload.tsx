@@ -15,6 +15,7 @@ interface FileUploadProps {
   maxFiles?: number
   maxSize?: number // в байтах
   acceptedTypes?: string[]
+  accept?: Record<string, string[]>
   className?: string
 }
 
@@ -22,21 +23,9 @@ export function FileUploadComponent({
   onFilesChange,
   files,
   maxFiles = 10,
-  maxSize = 10 * 1024 * 1024, // 10MB
-  acceptedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/svg+xml',
-    'video/mp4',
-    'video/avi',
-    'video/quicktime',
-    'application/zip',
-    'application/x-rar-compressed'
-  ],
+  maxSize = 30 * 1024 * 1024, // 30MB
+  acceptedTypes,
+  accept,
   className
 }: FileUploadProps) {
   const { uploadFile, uploading } = useFileUpload()
@@ -112,14 +101,30 @@ export function FileUploadComponent({
     }, 100)
   }, [files, maxFiles, onFilesChange, uploadSingleFile])
 
+  // Подготавливаем accept объект
+  const getAcceptObject = () => {
+    if (accept) {
+      // Проверяем, не является ли это wildcard accept
+      if (accept['*'] && accept['*'].includes('*')) {
+        return undefined // Принимаем все файлы
+      }
+      return accept
+    }
+    if (acceptedTypes) {
+      return acceptedTypes.reduce((acc, type) => {
+        acc[type] = []
+        return acc
+      }, {} as Record<string, string[]>)
+    }
+    // Если ничего не указано, принимаем все файлы
+    return undefined
+  }
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     maxFiles,
     maxSize,
-    accept: acceptedTypes.reduce((acc, type) => {
-      acc[type] = []
-      return acc
-    }, {} as Record<string, string[]>),
+    accept: getAcceptObject(),
     disabled: uploading
   })
 

@@ -375,13 +375,7 @@ export default function NewLabPage() {
                 files={files}
                 onFilesChange={setFiles}
                 maxFiles={10}
-                acceptedTypes={[
-                  'application/pdf',
-                  'application/msword',
-                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                  'application/zip',
-                  'application/x-rar-compressed'
-                ]}
+                maxSize={30 * 1024 * 1024} // 30MB
               />
             </CardContent>
           </Card>

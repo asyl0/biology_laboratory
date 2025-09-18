@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Navigation } from '@/components/Navigation'
+import { useStudentsMaterials } from '@/hooks/useStudentsMaterials'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,26 +12,21 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileUploadComponent } from '@/components/ui/file-upload'
-import { ArrowLeft, Save, Plus, X } from 'lucide-react'
+import { ArrowLeft, Save } from 'lucide-react'
 
 export default function NewStudentMaterialPage() {
   const { role } = useAuth()
   const router = useRouter()
+  const { createMaterial } = useStudentsMaterials()
   const [loading, setLoading] = useState(false)
-  const [externalLink, setExternalLink] = useState('')
+  const [files, setFiles] = useState<Array<{ file: File; status: 'pending' | 'uploading' | 'completed' | 'error'; url?: string; name: string }>>([])
+  const [cardImages, setCardImages] = useState<Array<{ file: File; status: 'pending' | 'uploading' | 'completed' | 'error'; url?: string; name: string }>>([])
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    theory: '',
-    process: '',
-    class_level: '9',
-    video_url: '',
-    external_links: [] as string[]
+    class_level: '9'
   })
-
-  const [files, setFiles] = useState<Array<{ file: File; status: 'pending' | 'uploading' | 'completed' | 'error'; url?: string; name: string }>>([])
-  const [cardImages, setCardImages] = useState<Array<{ file: File; status: 'pending' | 'uploading' | 'completed' | 'error'; url?: string; name: string }>>([])
 
   // Проверка прав доступа
   useEffect(() => {
@@ -57,38 +53,30 @@ export default function NewStudentMaterialPage() {
     }))
   }
 
-  const handleAddExternalLink = () => {
-    if (externalLink.trim()) {
-      const newLink = externalLink.trim()
-      setFormData(prev => ({
-        ...prev,
-        external_links: [...prev.external_links, newLink]
-      }))
-      setExternalLink('')
-    }
-  }
-
-  const handleRemoveExternalLink = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      external_links: prev.external_links.filter((_, i) => i !== index)
-    }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Здесь будет логика сохранения студенческого материала
-      console.log('Saving student material:', formData)
+      // Подготавливаем данные для сохранения
+      const materialData = {
+        title: formData.title,
+        description: formData.description,
+        class_level: parseInt(formData.class_level),
+        image_url: cardImages.length > 0 ? cardImages[0].url : null,
+        files: files.map(f => f.url).filter(Boolean)
+      }
+
+      console.log('Saving student material:', materialData)
       
-      // Заглушка - в реальном приложении здесь будет запрос к Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Сохраняем в базу данных
+      await createMaterial(materialData)
       
       router.push('/admin/students')
     } catch (error) {
       console.error('Error saving student material:', error)
+      alert('Ошибка при сохранении материала: ' + (error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -171,15 +159,6 @@ export default function NewStudentMaterialPage() {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="video_url">Видео сілтемесі</Label>
-                    <Input
-                      id="video_url"
-                      value={formData.video_url}
-                      onChange={(e) => handleInputChange('video_url', e.target.value)}
-                      placeholder="https://youtube.com/watch?v=..."
-                    />
-                  </div>
                 </CardContent>
               </Card>
 
@@ -210,104 +189,8 @@ export default function NewStudentMaterialPage() {
 
             {/* Правая колонка */}
             <div className="space-y-6">
-              {/* Теория */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Теория</CardTitle>
-                  <CardDescription>
-                    Теориялық негіздер мен түсініктер
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Label htmlFor="theory">Теориялық мазмұн</Label>
-                    <Textarea
-                      id="theory"
-                      value={formData.theory}
-                      onChange={(e) => handleInputChange('theory', e.target.value)}
-                      placeholder="Теориялық негіздер..."
-                      rows={8}
-                      maxLength={10000}
-                      required
-                    />
-                    <p className="text-sm text-gray-500">
-                      {formData.theory.length}/10000 символов
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Процесс */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Процесс</CardTitle>
-                  <CardDescription>
-                    Материалды пайдалану процесі
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Label htmlFor="process">Процесс сипаттамасы</Label>
-                    <Textarea
-                      id="process"
-                      value={formData.process}
-                      onChange={(e) => handleInputChange('process', e.target.value)}
-                      placeholder="1. Материалды оқу..."
-                      rows={8}
-                      maxLength={10000}
-                      required
-                    />
-                    <p className="text-sm text-gray-500">
-                      {formData.process.length}/10000 символов
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Внешние ссылки */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Сыртқы сілтемелер</CardTitle>
-                  <CardDescription>
-                    Қосымша ресурстарға сілтемелер
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      value={externalLink}
-                      onChange={(e) => setExternalLink(e.target.value)}
-                      placeholder="https://example.com"
-                      maxLength={500}
-                    />
-                    <Button type="button" onClick={handleAddExternalLink}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <p className="text-sm text-gray-500">
-                    Ссылок: {formData.external_links.length}/10
-                  </p>
-                  
-                  {formData.external_links.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.external_links.map((link, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                          <span className="text-sm truncate">{link}</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveExternalLink(index)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
             </div>
           </div>
 
@@ -323,17 +206,8 @@ export default function NewStudentMaterialPage() {
               <FileUploadComponent
                 files={files}
                 onFilesChange={setFiles}
-                accept={{
-                  'application/pdf': ['.pdf'],
-                  'application/msword': ['.doc'],
-                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                  'application/vnd.ms-excel': ['.xls'],
-                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                  'text/plain': ['.txt'],
-                  'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
-                }}
                 maxFiles={10}
-                maxSize={10 * 1024 * 1024} // 10MB
+                maxSize={30 * 1024 * 1024} // 30MB
               />
             </CardContent>
           </Card>

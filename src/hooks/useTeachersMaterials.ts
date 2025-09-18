@@ -51,9 +51,22 @@ export function useTeachersMaterials() {
     try {
       console.log('Creating teacher material with data:', materialData)
       
+      // Подготавливаем данные для вставки, убираем undefined значения
+      const insertData = {
+        title: materialData.title,
+        description: materialData.description,
+        class_level: materialData.class_level,
+        image_url: materialData.image_url || null,
+        files: materialData.files || null,
+        theory: null, // Поле не используется в упрощенной форме
+        process: null, // Поле не используется в упрощенной форме
+        video_url: null, // Поле не используется в упрощенной форме
+        external_links: null // Поле не используется в упрощенной форме
+      }
+      
       const { data, error } = await supabase
         .from('teachers_materials')
-        .insert([materialData])
+        .insert([insertData])
         .select()
 
       if (error) {
@@ -116,6 +129,7 @@ export function useTeachersMaterials() {
 
   return {
     materials,
+    teachersMaterials: materials, // Алиас для совместимости
     loading,
     error,
     fetchMaterials,

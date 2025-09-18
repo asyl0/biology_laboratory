@@ -30,6 +30,11 @@ export function Navigation() {
   const userMenuRef = useRef<HTMLDivElement>(null)
 
   const getNavigationItems = () => {
+    // Если пользователь не авторизован, не показываем никаких разделов
+    if (!user) {
+      return []
+    }
+    
     const items = [
       { href: '/labs', label: 'Зертханалық жұмыстар', icon: FlaskConical, roles: ['student', 'teacher', 'admin'] },
       { href: '/steam', label: 'STEAM материалдары', icon: Atom, roles: ['student', 'teacher', 'admin'] },
@@ -37,7 +42,7 @@ export function Navigation() {
       { href: '/students', label: 'Оқушыларға арналған материалдар', icon: GraduationCap, roles: ['student', 'admin'] },
     ]
     
-    return items.filter(item => !role || item.roles.includes(role))
+    return items.filter(item => role && item.roles.includes(role))
   }
 
   const adminItems = [
