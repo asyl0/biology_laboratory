@@ -110,34 +110,38 @@ export default function LabDetailPage() {
         {/* Main Content */}
         <div className="space-y-8">
           {/* Theory */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Теория</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="prose prose-sm max-w-none break-words"
-                dangerouslySetInnerHTML={{ 
-                  __html: lab.theory.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
-                }}
-              />
-            </CardContent>
-          </Card>
+          {lab.theory && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Теория</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className="prose prose-sm max-w-none break-words"
+                  dangerouslySetInnerHTML={{ 
+                    __html: lab.theory.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Process */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Процесс выполнения</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="prose prose-sm max-w-none break-words"
-                dangerouslySetInnerHTML={{ 
-                  __html: lab.process.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
-                }}
-              />
-            </CardContent>
-          </Card>
+          {lab.process && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Процесс выполнения</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className="prose prose-sm max-w-none break-words"
+                  dangerouslySetInnerHTML={{ 
+                    __html: lab.process.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Video */}
           {lab.video_url && (

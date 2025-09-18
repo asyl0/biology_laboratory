@@ -12,19 +12,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Atom, 
   Search, 
+  Filter,
   Calendar,
-  User,
   Eye
 } from 'lucide-react'
+import { SteamMaterial } from '@/types'
 
 export default function SteamPage() {
   const { user, role } = useAuth()
-  const { steamMaterials, loading } = useSteam()
+  const { materials, loading } = useSteam()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('all')
 
   // Фильтрация STEAM материалов
-  const filteredMaterials = steamMaterials.filter(material => {
+  const filteredMaterials = materials.filter(material => {
     const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesClass = selectedClass === 'all' || material.class_level.toString() === selectedClass
@@ -99,7 +100,7 @@ export default function SteamPage() {
                 <Atom className="h-8 w-8 text-green-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Барлық материалдар</p>
-                  <p className="text-2xl font-bold text-gray-900">{steamMaterials.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -114,7 +115,7 @@ export default function SteamPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">9 сынып</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {steamMaterials.filter(material => material.class_level === 9).length}
+                    {materials.filter(material => material.class_level === 9).length}
                   </p>
                 </div>
               </div>
@@ -130,7 +131,7 @@ export default function SteamPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">10 сынып</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {steamMaterials.filter(material => material.class_level === 10).length}
+                    {materials.filter(material => material.class_level === 10).length}
                   </p>
                 </div>
               </div>
@@ -146,7 +147,7 @@ export default function SteamPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">11 сынып</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {steamMaterials.filter(material => material.class_level === 11).length}
+                    {materials.filter(material => material.class_level === 11).length}
                   </p>
                 </div>
               </div>
@@ -189,10 +190,6 @@ export default function SteamPage() {
                   <div className="flex items-center space-x-1">
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(material.created_at).toLocaleDateString('kk-KZ')}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <User className="h-4 w-4" />
-                    <span>{material.files.length} файл</span>
                   </div>
                 </div>
               </CardContent>

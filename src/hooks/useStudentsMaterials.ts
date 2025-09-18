@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export interface TeacherMaterial {
+export interface StudentMaterial {
   id: string
   title: string
   description: string
@@ -18,8 +18,8 @@ export interface TeacherMaterial {
   updated_at: string
 }
 
-export function useTeachersMaterials() {
-  const [materials, setMaterials] = useState<TeacherMaterial[]>([])
+export function useStudentsMaterials() {
+  const [materials, setMaterials] = useState<StudentMaterial[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,12 +28,12 @@ export function useTeachersMaterials() {
     try {
       setLoading(true)
       const { data, error } = await supabase
-        .from('teachers_materials')
+        .from('students_materials')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching teacher materials:', error)
+        console.error('Error fetching student materials:', error)
         setError(error.message)
         return
       }
@@ -47,21 +47,21 @@ export function useTeachersMaterials() {
     }
   }, [])
 
-  const createMaterial = async (materialData: Omit<TeacherMaterial, 'id' | 'created_at' | 'updated_at'>) => {
+  const createMaterial = async (materialData: Omit<StudentMaterial, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      console.log('Creating teacher material with data:', materialData)
+      console.log('Creating student material with data:', materialData)
       
       const { data, error } = await supabase
-        .from('teachers_materials')
+        .from('students_materials')
         .insert([materialData])
         .select()
 
       if (error) {
-        console.error('Error creating teacher material:', error)
+        console.error('Error creating student material:', error)
         throw error
       }
 
-      console.log('Teacher material created successfully:', data)
+      console.log('Student material created successfully:', data)
       await fetchMaterials()
       return data?.[0]
     } catch (err) {
@@ -70,16 +70,16 @@ export function useTeachersMaterials() {
     }
   }
 
-  const updateMaterial = async (id: string, materialData: Partial<TeacherMaterial>) => {
+  const updateMaterial = async (id: string, materialData: Partial<StudentMaterial>) => {
     try {
       const { data, error } = await supabase
-        .from('teachers_materials')
+        .from('students_materials')
         .update(materialData)
         .eq('id', id)
         .select()
 
       if (error) {
-        console.error('Error updating teacher material:', error)
+        console.error('Error updating student material:', error)
         throw error
       }
 
@@ -94,12 +94,12 @@ export function useTeachersMaterials() {
   const deleteMaterial = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('teachers_materials')
+        .from('students_materials')
         .delete()
         .eq('id', id)
 
       if (error) {
-        console.error('Error deleting teacher material:', error)
+        console.error('Error deleting student material:', error)
         throw error
       }
 

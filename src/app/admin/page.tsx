@@ -51,7 +51,7 @@ export default function AdminPage() {
       bgColor: 'bg-green-50'
     },
     {
-      title: 'Мұғалім материалдары',
+      title: 'Мұғалімдерге арналған материалдар',
       description: 'Мұғалім материалдарын басқару',
       icon: FileText,
       href: '/admin/teachers',
@@ -59,28 +59,12 @@ export default function AdminPage() {
       bgColor: 'bg-purple-50'
     },
     {
-      title: 'Пайдаланушылар',
-      description: 'Пайдаланушыларды басқару',
+      title: 'Оқушыларға арналған материалдар',
+      description: 'Оқушы материалдарын басқару',
       icon: Users,
-      href: '/admin/users',
+      href: '/admin/students',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50'
-    },
-    {
-      title: 'Статистика',
-      description: 'Платформа статистикасы',
-      icon: BarChart3,
-      href: '/admin/stats',
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50'
-    },
-    {
-      title: 'Теңшеулер',
-      description: 'Жүйе теңшеулері',
-      icon: Settings,
-      href: '/admin/settings',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50'
     }
   ]
 
@@ -101,6 +85,12 @@ export default function AdminPage() {
       title: 'Мұғалім материал қосу',
       description: 'Мұғалім материал қосу',
       href: '/admin/teachers/new',
+      icon: Plus
+    },
+    {
+      title: 'Оқушы материал қосу',
+      description: 'Оқушы материал қосу',
+      href: '/admin/students/new',
       icon: Plus
     }
   ]
@@ -221,8 +211,8 @@ export default function AdminPage() {
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-orange-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Пайдаланушылар</p>
-                  <p className="text-2xl font-bold text-gray-900">1</p>
+                  <p className="text-sm font-medium text-gray-500">Оқушы материалдары</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                 </div>
               </div>
             </CardContent>

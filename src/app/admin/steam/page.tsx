@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { useSteam } from '@/hooks/useSteam'
 import { useRouter } from 'next/navigation'
 import { Navigation } from '@/components/Navigation'
@@ -14,13 +15,14 @@ import {
   Trash2, 
   Eye, 
   Atom,
-  Calendar,
-  User
+  Calendar
 } from 'lucide-react'
+import { SteamMaterial } from '@/types'
 
 export default function AdminSteamPage() {
   const { user, role } = useAuth()
-  const { steamMaterials, loading, deleteSteamMaterial } = useSteam()
+  const { t } = useLanguage()
+  const { materials, loading, deleteMaterial } = useSteam()
   const router = useRouter()
 
   // Проверка прав доступа
@@ -32,9 +34,9 @@ export default function AdminSteamPage() {
   }, [role, router])
 
   const handleDelete = async (id: string) => {
-    if (confirm('Бұл STEAM материалды жойғыңыз келе ме?')) {
+    if (confirm(t('admin.steam.delete_confirm'))) {
       try {
-        await deleteSteamMaterial(id)
+        await deleteMaterial(id)
       } catch (error) {
         console.error('Error deleting steam material:', error)
       }
@@ -83,10 +85,10 @@ export default function AdminSteamPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Atom className="h-8 w-8 text-green-600" />
+                <Atom className="h-8 w-8 text-primary" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Барлық материалдар</p>
-                  <p className="text-2xl font-bold text-gray-900">{steamMaterials.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -101,7 +103,7 @@ export default function AdminSteamPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">9 сынып</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {steamMaterials.filter(material => material.class_level === 9).length}
+                    {materials.filter(material => material.class_level === 9).length}
                   </p>
                 </div>
               </div>
@@ -117,7 +119,7 @@ export default function AdminSteamPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">10 сынып</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {steamMaterials.filter(material => material.class_level === 10).length}
+                    {materials.filter(material => material.class_level === 10).length}
                   </p>
                 </div>
               </div>
@@ -133,7 +135,7 @@ export default function AdminSteamPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">11 сынып</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {steamMaterials.filter(material => material.class_level === 11).length}
+                    {materials.filter(material => material.class_level === 11).length}
                   </p>
                 </div>
               </div>
@@ -143,7 +145,7 @@ export default function AdminSteamPage() {
 
         {/* Materials List */}
         <div className="space-y-6">
-          {steamMaterials.map((material) => (
+          {materials.map((material) => (
             <Card key={material.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -162,11 +164,7 @@ export default function AdminSteamPage() {
                     <div className="flex items-center gap-6 text-sm text-gray-500">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {new Date(material.created_at).toLocaleDateString('kz-KZ')}
-                      </div>
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {material.files.length} файл
+                        {new Date(material.created_at).toLocaleDateString('ru-RU')}
                       </div>
                     </div>
                   </div>
@@ -210,7 +208,7 @@ export default function AdminSteamPage() {
           ))}
         </div>
 
-        {steamMaterials.length === 0 && (
+        {materials.length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
               <Atom className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -223,7 +221,7 @@ export default function AdminSteamPage() {
               <Button asChild>
                 <a href="/admin/steam/new">
                   <Plus className="h-5 w-5 mr-2" />
-                  STEAM материалды жасау
+                  STEAM материал жасау
                 </a>
               </Button>
             </CardContent>
@@ -233,4 +231,3 @@ export default function AdminSteamPage() {
     </div>
   )
 }
-

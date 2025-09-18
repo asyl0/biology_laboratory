@@ -1,19 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { useSteam } from '@/hooks/useSteam'
+import { useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { SteamMaterial } from '@/types'
+import { useSteam } from '@/hooks/useSteam'
 import { Navigation } from '@/components/Navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Calendar, User, Download, Play, ExternalLink, FileText, Atom } from 'lucide-react'
+import { 
+  ArrowLeft, 
+  ExternalLink, 
+  Calendar
+} from 'lucide-react'
+import { SteamMaterial } from '@/types'
 
 export default function SteamDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const { user } = useAuth()
   const { materials, loading: materialsLoading } = useSteam()
   const [material, setMaterial] = useState<SteamMaterial | null>(null)
@@ -71,10 +74,6 @@ export default function SteamDetailPage() {
                   <Calendar className="h-4 w-4 mr-1" />
                   {new Date(material.created_at).toLocaleDateString('kk-KZ')}
                 </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <User className="h-4 w-4 mr-1" />
-                  {material.files.length} файл
-                </div>
               </div>
               
               <h1 className="text-3xl font-bold text-gray-900 mb-4 break-words">
@@ -86,51 +85,6 @@ export default function SteamDetailPage() {
               </p>
             </div>
             
-            {/* Actions */}
-            <div className="lg:w-80">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Әрекеттер</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {material.files.length > 0 && (
-                    <Button className="w-full" size="lg">
-                      <Download className="h-4 w-4 mr-2" />
-                      Барлық файлдарды жүктеп алу
-                    </Button>
-                  )}
-                  
-                  {material.video_url && (
-                    <Button variant="outline" className="w-full" size="lg" asChild>
-                      <a href={material.video_url} target="_blank" rel="noopener noreferrer">
-                        <Play className="h-4 w-4 mr-2" />
-                        Видеоны көру
-                      </a>
-                    </Button>
-                  )}
-                  
-                  {material.external_links && material.external_links.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-700">Сыртқы ресурстар:</p>
-                      {material.external_links.map((link, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start"
-                          asChild
-                        >
-                          <a href={link} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            <span className="truncate">Ресурс {index + 1}</span>
-                          </a>
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
 
@@ -148,120 +102,73 @@ export default function SteamDetailPage() {
         {/* Main Content */}
         <div className="space-y-8">
           {/* Theory */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Теория</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="prose prose-sm max-w-none break-words"
-                dangerouslySetInnerHTML={{ 
-                  __html: material.theory.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
-                }}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Process */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Орындау процесі</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="prose prose-sm max-w-none break-words"
-                dangerouslySetInnerHTML={{ 
-                  __html: material.process.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
-                }}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Video */}
-          {material.video_url && (
+          {material.theory && (
             <Card>
               <CardHeader>
-                <CardTitle>Видеоматериал</CardTitle>
+                <CardTitle>Теория</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Button asChild>
-                    <a href={material.video_url} target="_blank" rel="noopener noreferrer">
-                      <Play className="h-8 w-8 mr-2" />
-                      Видеоны көру
-                    </a>
-                  </Button>
-                </div>
+                <div 
+                  className="prose prose-sm max-w-none break-words"
+                  dangerouslySetInnerHTML={{ 
+                    __html: material.theory.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                  }}
+                />
               </CardContent>
             </Card>
           )}
-        </div>
 
-        {/* Files and External Links - Horizontal Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          {/* Files */}
-          {material.files.length > 0 && (
+          {/* Process */}
+          {material.process && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Жүктеп алу файлдары
-                </CardTitle>
+                <CardTitle>Орындау процесі</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {material.files.map((file, index) => (
+                <div 
+                  className="prose prose-sm max-w-none break-words"
+                  dangerouslySetInnerHTML={{ 
+                    __html: material.process.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+        </div>
+
+        {/* External Links */}
+        {material.external_links && material.external_links.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <ExternalLink className="h-5 w-5 mr-2" />
+                Сыртқы ресурстар
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {material.external_links.map((link, index) => {
+                  // Извлекаем домен из URL для отображения
+                  const domain = link.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+                  return (
                     <Button
                       key={index}
                       variant="outline"
                       className="w-full justify-start"
                       asChild
                     >
-                      <a href={file} target="_blank" rel="noopener noreferrer">
-                        <Download className="h-4 w-4 mr-2" />
-                        <span className="truncate">{file.split('/').pop()}</span>
+                      <a href={link} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <span className="truncate">{domain}</span>
                       </a>
                     </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* External Links */}
-          {material.external_links && material.external_links.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <ExternalLink className="h-5 w-5 mr-2" />
-                  Сыртқы ресурстар
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {material.external_links.map((link, index) => {
-                    // Извлекаем домен из URL для отображения
-                    const domain = link.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
-                    return (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        className="w-full justify-start"
-                        asChild
-                      >
-                        <a href={link} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          <span className="truncate">{domain}</span>
-                        </a>
-                      </Button>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-        </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   )

@@ -20,7 +20,7 @@ import {
   BookOpen
 } from 'lucide-react'
 
-interface TeacherMaterial {
+interface StudentMaterial {
   id: string
   title: string
   description: string
@@ -31,11 +31,11 @@ interface TeacherMaterial {
   external_links?: string[]
 }
 
-export default function AdminTeachersPage() {
+export default function AdminStudentsPage() {
   const { role } = useAuth()
   const router = useRouter()
-  const [materials, setMaterials] = useState<TeacherMaterial[]>([])
-  const [filteredMaterials, setFilteredMaterials] = useState<TeacherMaterial[]>([])
+  const [materials, setMaterials] = useState<StudentMaterial[]>([])
+  const [filteredMaterials, setFilteredMaterials] = useState<StudentMaterial[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('all')
   const [loading, setLoading] = useState(true)
@@ -47,38 +47,49 @@ export default function AdminTeachersPage() {
     }
   }, [role, router])
 
-  // Получение материалов учителей
+  if (role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Доступ запрещен</h2>
+          <p className="text-gray-600">У вас нет прав для доступа к этой странице</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Получение материалов для студентов
   useEffect(() => {
     const fetchMaterials = async () => {
       try {
-        // Здесь будет запрос к Supabase для получения материалов учителей
+        // Здесь будет запрос к Supabase для получения материалов для студентов
         // Пока используем заглушку
-        const mockMaterials: TeacherMaterial[] = [
+        const mockMaterials: StudentMaterial[] = [
           {
             id: '1',
-            title: 'Мұғалімдерге арналған нұсқаулық',
-            description: 'Биология сабақтарын жоспарлау және өткізу әдістері',
+            title: 'Биология негіздері',
+            description: 'Жасуша құрылымы және функциялары туралы негізгі түсініктер',
             image_url: '/api/placeholder/300/200',
             class_level: 9,
             created_at: '2024-01-15',
-            files: ['teacher_guide.pdf'],
-            external_links: ['https://example.com/teaching']
+            files: ['biology_basics.pdf'],
+            external_links: ['https://example.com/biology']
           },
           {
             id: '2',
-            title: 'Лабораториялық жұмыстар жинағы',
-            description: 'Биология лабораториялық жұмыстарының толық жинағы',
+            title: 'Химиялық реакциялар',
+            description: 'Химиялық реакциялардың түрлері мен заңдылықтары',
             image_url: '/api/placeholder/300/200',
             class_level: 10,
             created_at: '2024-01-20',
-            files: ['lab_work_collection.pdf'],
-            external_links: ['https://example.com/labwork']
+            files: ['chemistry_reactions.pdf'],
+            external_links: ['https://example.com/chemistry']
           }
         ]
         setMaterials(mockMaterials)
         setFilteredMaterials(mockMaterials)
       } catch (error) {
-        console.error('Error fetching teacher materials:', error)
+        console.error('Error fetching student materials:', error)
       } finally {
         setLoading(false)
       }
@@ -105,19 +116,8 @@ export default function AdminTeachersPage() {
     setFilteredMaterials(filtered)
   }, [materials, searchTerm, selectedClass])
 
-  if (role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Доступ запрещен</h2>
-          <p className="text-gray-600">У вас нет прав для доступа к этой странице</p>
-        </div>
-      </div>
-    )
-  }
-
   const handleEdit = (id: string) => {
-    router.push(`/admin/teachers/${id}/edit`)
+    router.push(`/admin/students/${id}/edit`)
   }
 
   const handleDelete = async (id: string) => {
@@ -133,7 +133,7 @@ export default function AdminTeachersPage() {
   }
 
   const handleView = (id: string) => {
-    router.push(`/teachers/${id}`)
+    router.push(`/students/${id}`)
   }
 
   if (loading) {
@@ -160,13 +160,13 @@ export default function AdminTeachersPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Мұғалімдерге арналған материалдар
+                Оқушыларға арналған материалдар
               </h1>
               <p className="text-gray-600">
-                Мұғалім материалдарын басқару және реттеу
+                Студент материалдарын басқару және реттеу
               </p>
             </div>
-            <Button onClick={() => router.push('/admin/teachers/new')}>
+            <Button onClick={() => router.push('/admin/students/new')}>
               <Plus className="h-4 w-4 mr-2" />
               Жаңа материал
             </Button>
@@ -205,7 +205,7 @@ export default function AdminTeachersPage() {
                 : 'Әлі материалдар қосылмаған'
               }
             </p>
-            <Button onClick={() => router.push('/admin/teachers/new')}>
+            <Button onClick={() => router.push('/admin/students/new')}>
               <Plus className="h-4 w-4 mr-2" />
               Бірінші материалды қосу
             </Button>
@@ -249,7 +249,7 @@ export default function AdminTeachersPage() {
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center text-xs text-gray-500">
                         <GraduationCap className="h-3 w-3 mr-1" />
-                        Мұғалім материалдары
+                        Студент материалдары
                       </div>
                       <div className="flex space-x-2">
                         <Button

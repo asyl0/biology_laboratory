@@ -22,8 +22,8 @@ export interface Lab {
   id: string;
   title: string;
   description: string;
-  theory: string;
-  process: string;
+  theory?: string;
+  process?: string;
   image_url?: string;
   video_url?: string;
   external_links?: string[];
@@ -38,24 +38,30 @@ export interface SteamMaterial {
   id: string;
   title: string;
   description: string;
-  image_url?: string;
-  external_links?: string[];
-  files: string[];
+  theory?: string;
+  process?: string;
   class_level: number; // 7-11
+  image_url?: string;
+  video_url?: string;
+  external_links?: string[];
+  files?: string[];
   created_at: string;
   updated_at: string;
-  created_by: string;
 }
 
 export interface TeacherMaterial {
   id: string;
   title: string;
   description: string;
-  files: string[];
-  class_level?: number; // 7-11, опционально
+  theory?: string;
+  process?: string;
+  class_level: number; // 7-11
+  image_url?: string;
+  video_url?: string;
+  external_links?: string[];
+  files?: string[];
   created_at: string;
   updated_at: string;
-  created_by: string;
 }
 
 export interface FileUpload {

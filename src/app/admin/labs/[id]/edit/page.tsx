@@ -40,9 +40,21 @@ export default function EditLabPage() {
   const [externalLink, setExternalLink] = useState('')
 
   // Проверка прав доступа
+  useEffect(() => {
+    if (role !== 'admin') {
+      router.push('/dashboard')
+    }
+  }, [role, router])
+
   if (role !== 'admin') {
-    router.push('/dashboard')
-    return null
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Доступ запрещен</h2>
+          <p className="text-gray-600">У вас нет прав для доступа к этой странице</p>
+        </div>
+      </div>
+    )
   }
 
   // Загрузка данных лабораторной работы

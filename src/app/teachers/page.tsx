@@ -24,7 +24,7 @@ export default function TeachersPage() {
   const [selectedClass, setSelectedClass] = useState('all')
 
   // Фильтрация материалов учителей
-  const filteredMaterials = teachersMaterials.filter(material => {
+  const filteredMaterials = (teachersMaterials || []).filter(material => {
     const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesClass = selectedClass === 'all' || 

@@ -29,17 +29,23 @@ export function Navigation() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
-  const navigationItems = [
-    { href: '/labs', label: 'Зертханалық жұмыстар', icon: FlaskConical },
-    { href: '/steam', label: 'STEAM материалдары', icon: Atom },
-    { href: '/teachers', label: 'Мұғалімдерге арналған материалдар', icon: GraduationCap },
-  ]
+  const getNavigationItems = () => {
+    const items = [
+      { href: '/labs', label: 'Зертханалық жұмыстар', icon: FlaskConical, roles: ['student', 'teacher', 'admin'] },
+      { href: '/steam', label: 'STEAM материалдары', icon: Atom, roles: ['student', 'teacher', 'admin'] },
+      { href: '/teachers', label: 'Мұғалімдерге арналған материалдар', icon: GraduationCap, roles: ['teacher', 'admin'] },
+      { href: '/students', label: 'Оқушыларға арналған материалдар', icon: GraduationCap, roles: ['student', 'admin'] },
+    ]
+    
+    return items.filter(item => !role || item.roles.includes(role))
+  }
 
   const adminItems = [
-    { href: '/admin', label: 'Админ панель', icon: Settings },
+    { href: '/admin', label: 'Админ', icon: Settings },
     { href: '/admin/labs', label: 'Зертханалық жұмыстар', icon: FlaskConical },
     { href: '/admin/steam', label: 'STEAM материалдары', icon: Atom },
     { href: '/admin/teachers', label: 'Мұғалім материалдары', icon: GraduationCap },
+    { href: '/admin/students', label: 'Оқушы материалдары', icon: GraduationCap },
   ]
 
   // Закрытие dropdown при клике вне его
@@ -81,7 +87,7 @@ export function Navigation() {
 
           {/* Десктопная навигация */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => {
+            {getNavigationItems().map((item) => {
               const Icon = item.icon
               return (
                 <Link
@@ -190,7 +196,7 @@ export function Navigation() {
           <div className="md:hidden">
             <Card className="mt-2 p-4">
               <div className="space-y-4">
-                {navigationItems.map((item) => {
+                {getNavigationItems().map((item) => {
                   const Icon = item.icon
                   return (
                     <Link

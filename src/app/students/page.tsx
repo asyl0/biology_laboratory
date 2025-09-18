@@ -2,25 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { Navigation } from '@/components/Navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Calendar,
-  GraduationCap,
-  BookOpen
-} from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useLabs } from '@/hooks/useLabs'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { Search, Filter, BookOpen, Calendar, GraduationCap } from 'lucide-react'
 
-interface TeacherMaterial {
+interface StudentMaterial {
   id: string
   title: string
   description: string
@@ -31,54 +22,47 @@ interface TeacherMaterial {
   external_links?: string[]
 }
 
-export default function AdminTeachersPage() {
-  const { role } = useAuth()
+export default function StudentsPage() {
   const router = useRouter()
-  const [materials, setMaterials] = useState<TeacherMaterial[]>([])
-  const [filteredMaterials, setFilteredMaterials] = useState<TeacherMaterial[]>([])
+  const { t } = useLanguage()
+  const [materials, setMaterials] = useState<StudentMaterial[]>([])
+  const [filteredMaterials, setFilteredMaterials] = useState<StudentMaterial[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('all')
   const [loading, setLoading] = useState(true)
 
-  // Проверка прав доступа
-  useEffect(() => {
-    if (role !== 'admin') {
-      router.push('/dashboard')
-    }
-  }, [role, router])
-
-  // Получение материалов учителей
+  // Получаем материалы для студентов из базы данных
   useEffect(() => {
     const fetchMaterials = async () => {
       try {
-        // Здесь будет запрос к Supabase для получения материалов учителей
+        // Здесь будет запрос к Supabase для получения материалов для студентов
         // Пока используем заглушку
-        const mockMaterials: TeacherMaterial[] = [
+        const mockMaterials: StudentMaterial[] = [
           {
             id: '1',
-            title: 'Мұғалімдерге арналған нұсқаулық',
-            description: 'Биология сабақтарын жоспарлау және өткізу әдістері',
+            title: 'Биология негіздері',
+            description: 'Жасуша құрылымы және функциялары туралы негізгі түсініктер',
             image_url: '/api/placeholder/300/200',
             class_level: 9,
             created_at: '2024-01-15',
-            files: ['teacher_guide.pdf'],
-            external_links: ['https://example.com/teaching']
+            files: ['biology_basics.pdf'],
+            external_links: ['https://example.com/biology']
           },
           {
             id: '2',
-            title: 'Лабораториялық жұмыстар жинағы',
-            description: 'Биология лабораториялық жұмыстарының толық жинағы',
+            title: 'Химиялық реакциялар',
+            description: 'Химиялық реакциялардың түрлері мен заңдылықтары',
             image_url: '/api/placeholder/300/200',
             class_level: 10,
             created_at: '2024-01-20',
-            files: ['lab_work_collection.pdf'],
-            external_links: ['https://example.com/labwork']
+            files: ['chemistry_reactions.pdf'],
+            external_links: ['https://example.com/chemistry']
           }
         ]
         setMaterials(mockMaterials)
         setFilteredMaterials(mockMaterials)
       } catch (error) {
-        console.error('Error fetching teacher materials:', error)
+        console.error('Error fetching student materials:', error)
       } finally {
         setLoading(false)
       }
@@ -105,46 +89,16 @@ export default function AdminTeachersPage() {
     setFilteredMaterials(filtered)
   }, [materials, searchTerm, selectedClass])
 
-  if (role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Доступ запрещен</h2>
-          <p className="text-gray-600">У вас нет прав для доступа к этой странице</p>
-        </div>
-      </div>
-    )
-  }
-
-  const handleEdit = (id: string) => {
-    router.push(`/admin/teachers/${id}/edit`)
-  }
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Бұл материалды жойғыңыз келе ме?')) {
-      try {
-        // Здесь будет запрос к Supabase для удаления материала
-        setMaterials(prev => prev.filter(material => material.id !== id))
-        setFilteredMaterials(prev => prev.filter(material => material.id !== id))
-      } catch (error) {
-        console.error('Error deleting material:', error)
-      }
-    }
-  }
-
-  const handleView = (id: string) => {
-    router.push(`/teachers/${id}`)
+  const handleMaterialClick = (id: string) => {
+    router.push(`/students/${id}`)
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Жүктелуде...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Жүктелуде...</p>
         </div>
       </div>
     )
@@ -152,25 +106,15 @@ export default function AdminTeachersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Заголовок */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Мұғалімдерге арналған материалдар
-              </h1>
-              <p className="text-gray-600">
-                Мұғалім материалдарын басқару және реттеу
-              </p>
-            </div>
-            <Button onClick={() => router.push('/admin/teachers/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Жаңа материал
-            </Button>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Оқушыларға арналған материалдар
+          </h1>
+          <p className="text-gray-600">
+            Оқу материалдары мен қосымша ресурстар
+          </p>
         </div>
 
         {/* Фильтры */}
@@ -185,6 +129,18 @@ export default function AdminTeachersPage() {
                 className="pl-10"
               />
             </div>
+            <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <SelectTrigger>
+                <SelectValue placeholder="Сыныпты таңдаңыз" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Барлық сыныптар</SelectItem>
+                <SelectItem value="9">9-сынып</SelectItem>
+                <SelectItem value="10">10-сынып</SelectItem>
+                <SelectItem value="11">11-сынып</SelectItem>
+                <SelectItem value="12">12-сынып</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex items-center text-sm text-gray-500">
               <Filter className="h-4 w-4 mr-2" />
               {filteredMaterials.length} материал табылды
@@ -199,21 +155,21 @@ export default function AdminTeachersPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Материалдар табылмады
             </h3>
-            <p className="text-gray-500 mb-4">
-              {searchTerm 
+            <p className="text-gray-500">
+              {searchTerm || selectedClass !== 'all' 
                 ? 'Іздеу критерийлеріне сәйкес материалдар жоқ'
                 : 'Әлі материалдар қосылмаған'
               }
             </p>
-            <Button onClick={() => router.push('/admin/teachers/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Бірінші материалды қосу
-            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMaterials.map((material) => (
-              <Card key={material.id} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={material.id} 
+                className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                onClick={() => handleMaterialClick(material.id)}
+              >
                 <CardHeader className="p-0">
                   {material.image_url ? (
                     <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
@@ -249,32 +205,11 @@ export default function AdminTeachersPage() {
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center text-xs text-gray-500">
                         <GraduationCap className="h-3 w-3 mr-1" />
-                        Мұғалім материалдары
+                        Студент материалдары
                       </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleView(material.id)}
-                        >
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(material.id)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(material.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      <Button size="sm" variant="outline">
+                        Ашу
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -282,7 +217,7 @@ export default function AdminTeachersPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }

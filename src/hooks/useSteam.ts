@@ -3,15 +3,15 @@ import { supabase } from '@/lib/supabase'
 import { SteamMaterial } from '@/types'
 
 export function useSteam() {
-  const [steamMaterials, setSteamMaterials] = useState<SteamMaterial[]>([])
+  const [materials, setMaterials] = useState<SteamMaterial[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchSteamMaterials()
+    fetchMaterials()
   }, [])
 
-  const fetchSteamMaterials = async () => {
+  const fetchMaterials = async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -20,7 +20,8 @@ export function useSteam() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setSteamMaterials(data || [])
+      
+      setMaterials(data || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка загрузки данных')
     } finally {
@@ -28,25 +29,61 @@ export function useSteam() {
     }
   }
 
-  const createSteamMaterial = async (materialData: Omit<SteamMaterial, 'id' | 'created_at' | 'updated_at'>) => {
+  const createMaterial = async (materialData: Omit<SteamMaterial, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Creating steam material with data:', materialData)
+      
+      // Временно отключаем проверки для тестирования
+      console.log('Skipping auth checks for testing...')
+
+      console.log('Sending to Supabase...')
+      console.log('Supabase client:', supabase)
+      console.log('Steam material data being sent:', JSON.stringify(materialData, null, 2))
+      
+      const startTime = Date.now()
+      console.log('Starting insert at:', new Date().toISOString())
+      
+      // Убираем таймаут для отладки
       const { data, error } = await supabase
         .from('steam')
         .insert([materialData])
         .select()
         .single()
 
-      if (error) throw error
-      
-      setSteamMaterials(prev => [data, ...prev])
+      const endTime = Date.now()
+      console.log('Insert completed in:', endTime - startTime, 'ms')
+      console.log('Supabase response:', { data, error })
+
+      if (error) {
+        console.error('Supabase error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          status: error.status,
+          statusText: error.statusText
+        })
+        throw error
+      }
+
+      console.log('Steam material created successfully:', data)
+      setMaterials(prev => [data, ...prev])
       return data
     } catch (err) {
+      console.error('Error in createMaterial:', err)
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined
+      })
       setError(err instanceof Error ? err.message : 'Ошибка создания')
       throw err
     }
   }
 
-  const updateSteamMaterial = async (id: string, materialData: Partial<SteamMaterial>) => {
+  const addMaterial = createMaterial;
+
+  const updateMaterial = async (id: string, materialData: Partial<SteamMaterial>) => {
     try {
       const { data, error } = await supabase
         .from('steam')
@@ -57,7 +94,7 @@ export function useSteam() {
 
       if (error) throw error
       
-      setSteamMaterials(prev => prev.map(material => material.id === id ? data : material))
+      setMaterials(prev => prev.map(material => material.id === id ? data : material))
       return data
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка обновления')
@@ -65,7 +102,7 @@ export function useSteam() {
     }
   }
 
-  const deleteSteamMaterial = async (id: string) => {
+  const deleteMaterial = async (id: string) => {
     try {
       const { error } = await supabase
         .from('steam')
@@ -74,21 +111,38 @@ export function useSteam() {
 
       if (error) throw error
       
-      setSteamMaterials(prev => prev.filter(material => material.id !== id))
+      setMaterials(prev => prev.filter(material => material.id !== id))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка удаления')
       throw err
     }
   }
 
+  const getMaterialById = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('steam')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки')
+      throw err
+    }
+  }
+
   return {
-    steamMaterials,
+    materials,
     loading,
     error,
-    fetchSteamMaterials,
-    createSteamMaterial,
-    updateSteamMaterial,
-    deleteSteamMaterial
+    fetchMaterials,
+    createMaterial,
+    addMaterial,
+    updateMaterial,
+    deleteMaterial,
+    getMaterialById
   }
 }
-

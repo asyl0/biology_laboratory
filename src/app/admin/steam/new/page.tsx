@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useLabs } from '@/hooks/useLabs'
+import { useSteam } from '@/hooks/useSteam'
 import { useRouter } from 'next/navigation'
 import { Navigation } from '@/components/Navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,14 +13,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileUploadComponent } from '@/components/ui/file-upload'
 import { ArrowLeft, Save, Upload } from 'lucide-react'
-import { Lab, FileUpload } from '@/types'
+import { SteamMaterial, FileUpload } from '@/types'
 
-export default function NewLabPage() {
+export default function NewSteamMaterialPage() {
   const { role } = useAuth()
-  const { addLab } = useLabs()
+  const { createMaterial } = useSteam()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [files, setFiles] = useState<FileUpload[]>([]) // Обычные файлы
   const [cardImages, setCardImages] = useState<FileUpload[]>([]) // Изображения для карточки
   
   const [formData, setFormData] = useState({
@@ -29,7 +28,6 @@ export default function NewLabPage() {
     theory: '',
     process: '',
     class_level: '',
-    video_url: '',
     external_links: [] as string[]
   })
 
@@ -65,6 +63,12 @@ export default function NewLabPage() {
         return
       }
       
+      // Проверяем, не существует ли уже такая ссылка
+      if (formData.external_links.includes(newLink)) {
+        alert('Такая ссылка уже добавлена')
+        return
+      }
+      
       setFormData(prev => {
         const newLinks = [...prev.external_links, newLink]
         console.log('Updated external_links:', newLinks)
@@ -91,27 +95,17 @@ export default function NewLabPage() {
     setLoading(true)
 
     try {
-      console.log('Starting to save lab...', { formData, files })
-      // console.log('External links before processing:', formData.external_links)
-      // console.log('Image URL before processing:', formData.image_url)
-      console.log('Video URL before processing:', formData.video_url)
-      // console.log('External links type:', typeof formData.external_links)
-      // console.log('External links is array:', Array.isArray(formData.external_links))
+      console.log('Starting to save steam material...', { formData })
       
-      // Обрабатываем обычные файлы
-      console.log('Files status:', files.map(f => ({ name: f.name, status: f.status, url: f.url })))
-      const uploadedFiles: string[] = files
-        .filter(f => f.status === 'completed' && f.url)
-        .map(f => f.url!)
+      // Файлы для скачивания убраны из STEAM материалов
 
       // Обрабатываем изображения для карточки
-      console.log('Card images status:', cardImages.map(f => ({ name: f.name, status: f.status, url: f.url })))
+      console.log('Card images status:', cardImages.map(f => ({ name: f.file?.name, status: f.status, url: f.url })))
       const cardImageUrls: string[] = cardImages
         .filter(f => f.status === 'completed' && f.url)
         .map(f => f.url!)
 
       // Обрабатываем URL поля с валидацией
-      const videoUrl = formData.video_url?.trim() || null
       
       // Обрабатываем внешние ссылки - упрощенная обработка
       console.log('Raw external_links from formData:', formData.external_links)
@@ -121,34 +115,30 @@ export default function NewLabPage() {
         .slice(0, 10) // Ограничиваем количество ссылок
 
       console.log('Processed data:', { 
-        videoUrl, 
         externalLinksArray, 
-        cardImageUrls, 
-        uploadedFiles 
+        cardImageUrls
       })
       console.log('External links array:', externalLinksArray)
       console.log('Card image URLs:', cardImageUrls)
 
-      const labData = {
+      const materialData = {
         title: formData.title?.substring(0, 500) || '', // Ограничиваем длину заголовка
         description: formData.description?.substring(0, 1000) || '', // Ограничиваем длину описания
         theory: formData.theory?.substring(0, 10000) || '', // Ограничиваем длину теории
         process: formData.process?.substring(0, 10000) || '', // Ограничиваем длину процесса
         class_level: parseInt(formData.class_level),
         image_url: cardImageUrls.length > 0 ? cardImageUrls[0] : null, // Первое изображение карточки
-        video_url: videoUrl,
-        external_links: externalLinksArray,
-        files: uploadedFiles // Обычные файлы для скачивания
+        external_links: externalLinksArray.length > 0 ? externalLinksArray : null
       }
 
-      console.log('Lab data to save:', labData)
+      console.log('Steam material data to save:', materialData)
       
-      const result = await addLab(labData)
-      console.log('Lab saved successfully:', result)
+      const result = await createMaterial(materialData)
+      console.log('Steam material saved successfully:', result)
       
-      router.push('/admin/labs')
+      router.push('/admin/steam')
     } catch (error) {
-      console.error('Error saving lab:', error)
+      console.error('Error saving steam material:', error)
       console.error('Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
@@ -168,17 +158,17 @@ export default function NewLabPage() {
         {/* Header */}
         <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
-            <a href="/admin/labs">
+            <a href="/admin/steam">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Назад к списку
             </a>
           </Button>
           
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Зертханалық жұмыс жасау
+            STEAM материал жасау
           </h1>
           <p className="text-gray-600">
-            Жаңа зертханалық жұмыс жасау үшін форманы толтырыңыз
+            Жаңа STEAM материал жасау үшін форманы толтырыңыз
           </p>
         </div>
 
@@ -188,7 +178,7 @@ export default function NewLabPage() {
             <CardHeader>
               <CardTitle>Негізгі ақпарат</CardTitle>
               <CardDescription>
-                Зертханалық жұмыс үшін атау, сипаттама және сынып
+                STEAM материал үшін атау, сипаттама және сынып
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -199,7 +189,7 @@ export default function NewLabPage() {
                     id="title"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
-                    placeholder="Жасуша құрылымын зерттеу"
+                    placeholder="STEAM жобасы: Робот жасау"
                     required
                   />
                 </div>
@@ -230,11 +220,12 @@ export default function NewLabPage() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Зертханалық жұмыстың қысқаша сипаттамасы"
+                  placeholder="STEAM материалдың қысқаша сипаттамасы"
                   rows={3}
                   required
                 />
               </div>
+
             </CardContent>
           </Card>
 
@@ -329,6 +320,12 @@ export default function NewLabPage() {
                   <Input
                     value={externalLink}
                     onChange={(e) => setExternalLink(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddExternalLink()
+                      }
+                    }}
                     placeholder="https://example.com"
                     maxLength={500}
                   />
@@ -362,29 +359,6 @@ export default function NewLabPage() {
             </Card>
           </div>
 
-          {/* Файлы для скачивания - полная ширина */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Жүктеп алу файлдары</CardTitle>
-              <CardDescription>
-                Оқушылар жүктей алатын құжаттар мен материалдар
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FileUploadComponent
-                files={files}
-                onFilesChange={setFiles}
-                maxFiles={10}
-                acceptedTypes={[
-                  'application/pdf',
-                  'application/msword',
-                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                  'application/zip',
-                  'application/x-rar-compressed'
-                ]}
-              />
-            </CardContent>
-          </Card>
 
 
           {/* Actions */}
@@ -392,7 +366,7 @@ export default function NewLabPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/admin/labs')}
+              onClick={() => router.push('/admin/steam')}
             >
               Болдырмау
             </Button>
@@ -415,4 +389,3 @@ export default function NewLabPage() {
     </div>
   )
 }
-

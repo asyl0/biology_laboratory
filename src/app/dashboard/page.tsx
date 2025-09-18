@@ -31,26 +31,26 @@ export default function Dashboard() {
   
   // Используем хуки для загрузки данных
   const { labs, loading: labsLoading } = useLabs()
-  const { steamMaterials, loading: steamLoading } = useSteam()
-  const { teacherMaterials, loading: teachersLoading } = useTeachersMaterials()
+  const { materials: steamMaterials, loading: steamLoading } = useSteam()
+  const { materials: teacherMaterials, loading: teachersLoading } = useTeachersMaterials()
   
   const loading = labsLoading || steamLoading || teachersLoading
 
-  const filteredLabs = labs.filter(lab => {
+  const filteredLabs = (labs || []).filter(lab => {
     const matchesSearch = lab.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lab.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesClass = !selectedClass || lab.class_level === selectedClass
     return matchesSearch && matchesClass
   })
 
-  const filteredSteam = steamMaterials.filter(material => {
+  const filteredSteam = (steamMaterials || []).filter(material => {
     const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesClass = !selectedClass || material.class_level === selectedClass
     return matchesSearch && matchesClass
   })
 
-  const filteredTeachers = teacherMaterials.filter(material => {
+  const filteredTeachers = (teacherMaterials || []).filter(material => {
     const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesClass = !selectedClass || (material.class_level && material.class_level === selectedClass)
@@ -213,7 +213,7 @@ export default function Dashboard() {
                     <CardContent>
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                         <span>{material.class_level} класс</span>
-                        <span>{material.files.length} файлов</span>
+                        <span>{material.files?.length || 0} файлов</span>
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" className="flex-1">
@@ -227,7 +227,7 @@ export default function Dashboard() {
                             </a>
                           </Button>
                         )}
-                        {material.files.length > 0 && (
+                        {(material.files?.length || 0) > 0 && (
                           <Button size="sm" variant="outline">
                             <Download className="h-4 w-4" />
                           </Button>
@@ -265,14 +265,14 @@ export default function Dashboard() {
                     <CardContent>
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                         <span>{material.class_level ? `${material.class_level} класс` : 'Все классы'}</span>
-                        <span>{material.files.length} файлов</span>
+                        <span>{material.files?.length || 0} файлов</span>
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" className="flex-1">
                           <Eye className="h-4 w-4 mr-2" />
                           Просмотр
                         </Button>
-                        {material.files.length > 0 && (
+                        {(material.files?.length || 0) > 0 && (
                           <Button size="sm" variant="outline">
                             <Download className="h-4 w-4" />
                           </Button>

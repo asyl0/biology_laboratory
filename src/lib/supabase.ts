@@ -98,82 +98,132 @@ export type Database = {
         Row: {
           id: string
           title: string
-          title_kz?: string
           description: string
-          description_kz?: string
-          image_url?: string
-          external_links?: string[]
-          files: string[]
+          theory?: string
+          process?: string
           class_level: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
+          files?: string[]
           created_at: string
           updated_at: string
-          created_by: string
         }
         Insert: {
           id?: string
           title: string
-          title_kz?: string
           description: string
-          description_kz?: string
+          theory?: string
+          process?: string
+          class_level: number
           image_url?: string
+          video_url?: string
           external_links?: string[]
           files?: string[]
-          class_level: number
           created_at?: string
           updated_at?: string
-          created_by: string
         }
         Update: {
           id?: string
           title?: string
-          title_kz?: string
           description?: string
-          description_kz?: string
+          theory?: string
+          process?: string
+          class_level?: number
           image_url?: string
+          video_url?: string
           external_links?: string[]
           files?: string[]
-          class_level?: number
           created_at?: string
           updated_at?: string
-          created_by?: string
         }
       }
       teachers_materials: {
         Row: {
           id: string
           title: string
-          title_kz?: string
           description: string
-          description_kz?: string
-          files: string[]
-          class_level?: number
+          theory?: string
+          process?: string
+          class_level: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
+          files?: string[]
           created_at: string
           updated_at: string
-          created_by: string
         }
         Insert: {
           id?: string
           title: string
-          title_kz?: string
           description: string
-          description_kz?: string
+          theory?: string
+          process?: string
+          class_level: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
           files?: string[]
-          class_level?: number
           created_at?: string
           updated_at?: string
-          created_by: string
         }
         Update: {
           id?: string
           title?: string
-          title_kz?: string
           description?: string
-          description_kz?: string
-          files?: string[]
+          theory?: string
+          process?: string
           class_level?: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
+          files?: string[]
           created_at?: string
           updated_at?: string
-          created_by?: string
+        }
+      }
+      students_materials: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          theory?: string
+          process?: string
+          class_level: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
+          files?: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          theory?: string
+          process?: string
+          class_level: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
+          files?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          theory?: string
+          process?: string
+          class_level?: number
+          image_url?: string
+          video_url?: string
+          external_links?: string[]
+          files?: string[]
+          created_at?: string
+          updated_at?: string
         }
       }
     }
