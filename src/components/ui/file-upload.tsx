@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, File, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, X, File, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { Button } from './button'
 import { Card, CardContent } from './card'
 import { cn } from '@/lib/utils'
@@ -230,11 +230,11 @@ export function FileUploadComponent({
                       )}
                       
                       {fileUpload.status === 'completed' && (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       )}
                       
                       {fileUpload.status === 'error' && (
-                        <AlertCircle className="h-5 w-5 text-red-500" />
+                        <AlertTriangle className="h-5 w-5 text-red-500" />
                       )}
                       
                       <Button

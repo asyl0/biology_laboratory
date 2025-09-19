@@ -194,7 +194,7 @@ export default function LabsPage() {
                   </div>
                   <div className="flex items-center space-x-1">
                     <User className="h-4 w-4" />
-                    <span>{lab.files.length} файл</span>
+                    <span>{lab.files?.length || 0} файл</span>
                   </div>
                 </div>
               </CardContent>

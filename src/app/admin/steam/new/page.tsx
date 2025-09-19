@@ -16,7 +16,7 @@ import { ArrowLeft, Save, Upload } from 'lucide-react'
 import { SteamMaterial, FileUpload } from '@/types'
 
 export default function NewSteamMaterialPage() {
-  const { role } = useAuth()
+  const { role, user } = useAuth()
   const { createMaterial } = useSteam()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -24,9 +24,6 @@ export default function NewSteamMaterialPage() {
   
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
-    theory: '',
-    process: '',
     class_level: '',
     external_links: [] as string[]
   })
@@ -56,18 +53,6 @@ export default function NewSteamMaterialPage() {
     if (externalLink.trim()) {
       const newLink = externalLink.trim()
       console.log('Link to add:', newLink)
-      
-      // Проверяем, не превышает ли количество ссылок лимит
-      if (formData.external_links.length >= 10) {
-        alert('Максимум 10 внешних ссылок')
-        return
-      }
-      
-      // Проверяем, не существует ли уже такая ссылка
-      if (formData.external_links.includes(newLink)) {
-        alert('Такая ссылка уже добавлена')
-        return
-      }
       
       setFormData(prev => {
         const newLinks = [...prev.external_links, newLink]
@@ -99,39 +84,62 @@ export default function NewSteamMaterialPage() {
       
       // Файлы для скачивания убраны из STEAM материалов
 
-      // Обрабатываем изображения для карточки
-      console.log('Card images status:', cardImages.map(f => ({ name: f.file?.name, status: f.status, url: f.url })))
+      // Обрабатываем изображения для карточки - улучшенная логика
+      console.log('Card images status:', cardImages.map(f => ({ fileName: f.file.name, status: f.status, url: f.url })))
+      console.log('Total card images:', cardImages.length)
+      console.log('Completed card images:', cardImages.filter(f => f.status === 'completed').length)
+      
+      // Ждем завершения загрузки всех файлов, если они есть
+      const pendingUploads = cardImages.filter(f => f.status === 'uploading' || f.status === 'pending')
+      if (pendingUploads.length > 0) {
+        console.log('Waiting for pending uploads...', pendingUploads.length)
+        // Даем время на завершение загрузки
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
+      
       const cardImageUrls: string[] = cardImages
         .filter(f => f.status === 'completed' && f.url)
         .map(f => f.url!)
-
-      // Обрабатываем URL поля с валидацией
       
-      // Обрабатываем внешние ссылки - упрощенная обработка
+      console.log('Final card image URLs:', cardImageUrls)
+
+      // Обрабатываем внешние ссылки - без ограничений
       console.log('Raw external_links from formData:', formData.external_links)
+      console.log('Total external links:', formData.external_links.length)
+      
       const externalLinksArray = (formData.external_links || [])
         .filter(link => link && typeof link === 'string' && link.trim() !== '')
         .map(link => link.trim())
-        .slice(0, 10) // Ограничиваем количество ссылок
+      
+      console.log('Processed external links:', externalLinksArray)
+      console.log('Final external links count:', externalLinksArray.length)
 
       console.log('Processed data:', { 
         externalLinksArray, 
         cardImageUrls
       })
-      console.log('External links array:', externalLinksArray)
-      console.log('Card image URLs:', cardImageUrls)
 
       const materialData = {
-        title: formData.title?.substring(0, 500) || '', // Ограничиваем длину заголовка
-        description: formData.description?.substring(0, 1000) || '', // Ограничиваем длину описания
-        theory: formData.theory?.substring(0, 10000) || '', // Ограничиваем длину теории
-        process: formData.process?.substring(0, 10000) || '', // Ограничиваем длину процесса
+        title: formData.title?.substring(0, 2000) || '', // Увеличиваем лимит заголовка до 2000 символов
+        description: '', // Пустое описание
         class_level: parseInt(formData.class_level),
-        image_url: cardImageUrls.length > 0 ? cardImageUrls[0] : null, // Первое изображение карточки
-        external_links: externalLinksArray.length > 0 ? externalLinksArray : null
+        image_url: cardImageUrls.length > 0 ? cardImageUrls[0] : undefined, // Первое изображение карточки
+        external_links: externalLinksArray,
+        created_by: user?.id || '' // Добавляем ID создателя
       }
 
       console.log('Steam material data to save:', materialData)
+      
+      // Проверяем, что у нас есть все необходимые данные
+      if (!materialData.title || !materialData.class_level) {
+        throw new Error('Заполните все обязательные поля')
+      }
+      
+      // Проверяем, что все файлы загружены (если есть)
+      const stillUploading = cardImages.some(f => f.status === 'uploading')
+      if (stillUploading) {
+        throw new Error('Дождитесь завершения загрузки файлов')
+      }
       
       const result = await createMaterial(materialData)
       console.log('Steam material saved successfully:', result)
@@ -178,7 +186,7 @@ export default function NewSteamMaterialPage() {
             <CardHeader>
               <CardTitle>Негізгі ақпарат</CardTitle>
               <CardDescription>
-                STEAM материал үшін атау, сипаттама және сынып
+                STEAM материал үшін атау және сынып
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -190,8 +198,12 @@ export default function NewSteamMaterialPage() {
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="STEAM жобасы: Робот жасау"
+                    maxLength={2000}
                     required
                   />
+                  <p className="text-sm text-gray-500">
+                    {formData.title.length}/2000 символов
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -214,84 +226,18 @@ export default function NewSteamMaterialPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Сипаттама</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="STEAM материалдың қысқаша сипаттамасы"
-                  rows={3}
-                  required
-                />
-              </div>
 
             </CardContent>
           </Card>
-
-          {/* Двухколоночная сетка для контента */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Теория */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Теориялық бөлім (міндетті емес)</CardTitle>
-                <CardDescription>
-                  Оқушыларға арналған теориялық негіздер
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="theory">Теория</Label>
-                <Textarea
-                  id="theory"
-                  value={formData.theory}
-                  onChange={(e) => handleInputChange('theory', e.target.value)}
-                  placeholder="Толық теориялық сипаттама... (міндетті емес)"
-                  rows={8}
-                  maxLength={10000}
-                />
-                <p className="text-sm text-gray-500">
-                  {formData.theory.length}/10000 символов
-                </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Процесс выполнения */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Орындау процесі (міндетті емес)</CardTitle>
-                <CardDescription>
-                  Жұмысты орындау үшін қадамдық нұсқаулар
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="process">Процесс</Label>
-                <Textarea
-                  id="process"
-                  value={formData.process}
-                  onChange={(e) => handleInputChange('process', e.target.value)}
-                  placeholder="1. Жабдықтарды дайындаңыз... (міндетті емес)"
-                  rows={8}
-                  maxLength={10000}
-                />
-                <p className="text-sm text-gray-500">
-                  {formData.process.length}/10000 символов
-                </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Двухколоночная сетка для файлов */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Изображения для карточки */}
             <Card>
               <CardHeader>
-                <CardTitle>Карточка суреті</CardTitle>
+                <CardTitle>Карточка суреті (міндетті емес)</CardTitle>
                 <CardDescription>
-                  Карточкада көрсетілетін суреттерді жүктеңіз
+                  Карточкада көрсетілетін суреттерді жүктеңіз. Бұл өріс міндетті емес.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -310,9 +256,9 @@ export default function NewSteamMaterialPage() {
             {/* Внешние ссылки */}
             <Card>
               <CardHeader>
-                <CardTitle>Сыртқы сілтемелер</CardTitle>
+                <CardTitle>Сыртқы сілтемелер (міндетті емес)</CardTitle>
                 <CardDescription>
-                  Қосымша ресурстарға сілтемелер қосыңыз
+                  Қосымша ресурстарға сілтемелер қосыңыз. Бұл өріс міндетті емес.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -327,7 +273,6 @@ export default function NewSteamMaterialPage() {
                       }
                     }}
                     placeholder="https://example.com"
-                    maxLength={500}
                   />
                   <Button type="button" onClick={handleAddExternalLink}>
                     Қосу
@@ -335,7 +280,7 @@ export default function NewSteamMaterialPage() {
                 </div>
                 
                 <p className="text-sm text-gray-500">
-                  Ссылок: {formData.external_links.length}/10
+                  Ссылок: {formData.external_links.length} (можно не добавлять)
                 </p>
                 
                 {formData.external_links.length > 0 && (
@@ -370,11 +315,16 @@ export default function NewSteamMaterialPage() {
             >
               Болдырмау
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || cardImages.some(f => f.status === 'uploading')}>
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                   Сақталуда...
+                </>
+              ) : cardImages.some(f => f.status === 'uploading') ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Файлдар жүктелуде...
                 </>
               ) : (
                 <>

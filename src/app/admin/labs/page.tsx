@@ -169,7 +169,7 @@ export default function AdminLabsPage() {
                       </div>
                       <div className="flex items-center">
                         <User className="h-4 w-4 mr-1" />
-                        {lab.files.length} файл
+                        {lab.files?.length || 0} файл
                       </div>
                     </div>
                   </div>

@@ -75,7 +75,7 @@ export default function TeacherDetailPage() {
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <User className="h-4 w-4 mr-1" />
-                  {material.files.length} файл
+                  {material.files?.length || 0} файл
                 </div>
               </div>
               
@@ -95,7 +95,7 @@ export default function TeacherDetailPage() {
                   <CardTitle>Әрекеттер</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {material.files.length > 0 && (
+                  {(material.files?.length || 0) > 0 && (
                     <Button className="w-full" size="lg">
                       <Download className="h-4 w-4 mr-2" />
                       Барлық файлдарды жүктеп алу
@@ -202,7 +202,7 @@ export default function TeacherDetailPage() {
         {/* Files and External Links - Horizontal Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           {/* Files */}
-          {material.files.length > 0 && (
+          {(material.files?.length || 0) > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">

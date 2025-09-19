@@ -80,7 +80,7 @@ export default function LabDetailPage() {
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <User className="h-4 w-4 mr-1" />
-                  {lab.files.length} файлов
+                  {lab.files?.length || 0} файлов
                 </div>
               </div>
               
@@ -166,7 +166,7 @@ export default function LabDetailPage() {
         {/* Files and External Links - Horizontal Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           {/* Files */}
-          {lab.files.length > 0 && (
+          {(lab.files?.length || 0) > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">

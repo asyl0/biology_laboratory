@@ -161,7 +161,15 @@ export default function SteamPage() {
             <Card 
               key={material.id} 
               className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-              onClick={() => window.location.href = `/steam/${material.id}`}
+              onClick={() => {
+                // Если есть внешние ссылки, открываем первую в новой вкладке
+                if (material.external_links && material.external_links.length > 0) {
+                  window.open(material.external_links[0], '_blank')
+                } else {
+                  // Если нет внешних ссылок, показываем уведомление
+                  alert('Бұл материал үшін сыртқы сілтемелер жоқ')
+                }
+              }}
             >
               <div className="aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
                 {material.image_url ? (

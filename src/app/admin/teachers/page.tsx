@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Plus, 
   Search, 
-  Filter, 
+  SlidersHorizontal, 
   Edit, 
   Trash2, 
   Eye, 
@@ -168,7 +168,7 @@ export default function AdminTeachersPage() {
               />
             </div>
             <div className="flex items-center text-sm text-gray-500">
-              <Filter className="h-4 w-4 mr-2" />
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
               {filteredMaterials.length} материал табылды
             </div>
           </div>

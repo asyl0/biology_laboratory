@@ -173,12 +173,18 @@ export default function AdminSteamPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      asChild
+                      onClick={() => {
+                        // Если есть внешние ссылки, открываем первую в новой вкладке
+                        if (material.external_links && material.external_links.length > 0) {
+                          window.open(material.external_links[0], '_blank')
+                        } else {
+                          // Если нет внешних ссылок, показываем уведомление
+                          alert('Бұл материал үшін сыртқы сілтемелер жоқ')
+                        }
+                      }}
                     >
-                      <a href={`/steam/${material.id}`}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Көру
-                      </a>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Көру
                     </Button>
                     
                     <Button

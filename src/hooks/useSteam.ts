@@ -43,32 +43,62 @@ export function useSteam() {
       const startTime = Date.now()
       console.log('Starting insert at:', new Date().toISOString())
       
-      // Убираем таймаут для отладки
-      const { data, error } = await supabase
+      // Добавляем таймаут для отладки
+      console.log('Creating insert promise...')
+      const insertPromise = supabase
         .from('steam')
         .insert([materialData])
         .select()
         .single()
-
-      const endTime = Date.now()
-      console.log('Insert completed in:', endTime - startTime, 'ms')
-      console.log('Supabase response:', { data, error })
-
-      if (error) {
-        console.error('Supabase error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          status: error.status,
-          statusText: error.statusText
+        .then(result => {
+          console.log('Insert promise resolved:', result)
+          return result
         })
-        throw error
-      }
+        .catch(error => {
+          console.log('Insert promise rejected:', error)
+          throw error
+        })
+      
+      console.log('Insert promise created, starting race...')
 
-      console.log('Steam material created successfully:', data)
-      setMaterials(prev => [data, ...prev])
-      return data
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout after 10 seconds')), 10000)
+      )
+
+      try {
+        console.log('Starting Promise.race...')
+        const result = await Promise.race([insertPromise, timeoutPromise])
+        console.log('Promise.race completed, result:', result)
+        const { data, error } = result
+
+        const endTime = Date.now()
+        console.log('Insert completed in:', endTime - startTime, 'ms')
+        console.log('Supabase response:', { data, error })
+
+        if (error) {
+          console.error('Supabase error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            status: error.status,
+            statusText: error.statusText
+          })
+          throw error
+        }
+
+        console.log('Steam material created successfully:', data)
+        setMaterials(prev => [data, ...prev])
+        return data
+      } catch (raceError) {
+        console.error('Race error (timeout or other):', raceError)
+        console.error('Race error details:', {
+          message: raceError instanceof Error ? raceError.message : 'Unknown race error',
+          stack: raceError instanceof Error ? raceError.stack : undefined,
+          name: raceError instanceof Error ? raceError.name : undefined
+        })
+        throw raceError
+      }
     } catch (err) {
       console.error('Error in createMaterial:', err)
       console.error('Error details:', {

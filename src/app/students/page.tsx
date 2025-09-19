@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useStudentsMaterials } from '@/hooks/useStudentsMaterials'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
-import { Search, Filter, BookOpen, Calendar, GraduationCap, Download, FileText } from 'lucide-react'
+import { Search, SlidersHorizontal, BookOpen, Calendar, GraduationCap, Download, FileText } from 'lucide-react'
 
 export default function StudentsPage() {
   const router = useRouter()
@@ -98,7 +98,7 @@ export default function StudentsPage() {
               </SelectContent>
             </Select>
             <div className="flex items-center text-sm text-gray-500">
-              <Filter className="h-4 w-4 mr-2" />
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
               {filteredMaterials.length} материал табылды
             </div>
           </div>

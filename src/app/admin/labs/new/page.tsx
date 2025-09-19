@@ -16,7 +16,7 @@ import { ArrowLeft, Save, Upload } from 'lucide-react'
 import { Lab, FileUpload } from '@/types'
 
 export default function NewLabPage() {
-  const { role } = useAuth()
+  const { role, user } = useAuth()
   const { addLab } = useLabs()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -59,12 +59,6 @@ export default function NewLabPage() {
       const newLink = externalLink.trim()
       console.log('Link to add:', newLink)
       
-      // Проверяем, не превышает ли количество ссылок лимит
-      if (formData.external_links.length >= 10) {
-        alert('Максимум 10 внешних ссылок')
-        return
-      }
-      
       setFormData(prev => {
         const newLinks = [...prev.external_links, newLink]
         console.log('Updated external_links:', newLinks)
@@ -99,26 +93,35 @@ export default function NewLabPage() {
       // console.log('External links is array:', Array.isArray(formData.external_links))
       
       // Обрабатываем обычные файлы
-      console.log('Files status:', files.map(f => ({ name: f.name, status: f.status, url: f.url })))
+      console.log('Files status:', files.map(f => ({ fileName: f.file.name, status: f.status, url: f.url })))
       const uploadedFiles: string[] = files
         .filter(f => f.status === 'completed' && f.url)
         .map(f => f.url!)
 
       // Обрабатываем изображения для карточки
-      console.log('Card images status:', cardImages.map(f => ({ name: f.name, status: f.status, url: f.url })))
+      console.log('Card images status:', cardImages.map(f => ({ fileName: f.file.name, status: f.status, url: f.url })))
+      console.log('Total card images:', cardImages.length)
+      console.log('Completed card images:', cardImages.filter(f => f.status === 'completed').length)
+      
       const cardImageUrls: string[] = cardImages
         .filter(f => f.status === 'completed' && f.url)
         .map(f => f.url!)
+      
+      console.log('Final card image URLs:', cardImageUrls)
 
       // Обрабатываем URL поля с валидацией
-      const videoUrl = formData.video_url?.trim() || null
+      const videoUrl = formData.video_url?.trim() || undefined
       
-      // Обрабатываем внешние ссылки - упрощенная обработка
+      // Обрабатываем внешние ссылки - без ограничений
       console.log('Raw external_links from formData:', formData.external_links)
+      console.log('Total external links:', formData.external_links.length)
+      
       const externalLinksArray = (formData.external_links || [])
         .filter(link => link && typeof link === 'string' && link.trim() !== '')
         .map(link => link.trim())
-        .slice(0, 10) // Ограничиваем количество ссылок
+      
+      console.log('Processed external links:', externalLinksArray)
+      console.log('Final external links count:', externalLinksArray.length)
 
       console.log('Processed data:', { 
         videoUrl, 
@@ -130,18 +133,25 @@ export default function NewLabPage() {
       console.log('Card image URLs:', cardImageUrls)
 
       const labData = {
-        title: formData.title?.substring(0, 500) || '', // Ограничиваем длину заголовка
-        description: formData.description?.substring(0, 1000) || '', // Ограничиваем длину описания
-        theory: formData.theory?.substring(0, 10000) || '', // Ограничиваем длину теории
-        process: formData.process?.substring(0, 10000) || '', // Ограничиваем длину процесса
+        title: formData.title?.substring(0, 1000) || '', // Увеличиваем лимит заголовка
+        description: formData.description?.substring(0, 5000) || '', // Увеличиваем лимит описания
+        theory: formData.theory?.substring(0, 50000) || '', // Увеличиваем лимит теории
+        process: formData.process?.substring(0, 50000) || '', // Увеличиваем лимит процесса
         class_level: parseInt(formData.class_level),
-        image_url: cardImageUrls.length > 0 ? cardImageUrls[0] : null, // Первое изображение карточки
+        image_url: cardImageUrls.length > 0 ? cardImageUrls[0] : undefined, // Первое изображение карточки (может быть undefined)
         video_url: videoUrl,
         external_links: externalLinksArray,
-        files: uploadedFiles // Обычные файлы для скачивания
+        files: uploadedFiles, // Обычные файлы для скачивания
+        created_by: user?.id || '' // Добавляем ID создателя
       }
 
       console.log('Lab data to save:', labData)
+      console.log('Image URL being saved:', labData.image_url)
+      
+      // Проверяем, что у нас есть все необходимые данные
+      if (!labData.title || !labData.description || !labData.class_level) {
+        throw new Error('Заполните все обязательные поля')
+      }
       
       const result = await addLab(labData)
       console.log('Lab saved successfully:', result)
@@ -257,10 +267,10 @@ export default function NewLabPage() {
                   onChange={(e) => handleInputChange('theory', e.target.value)}
                   placeholder="Толық теориялық сипаттама... (міндетті емес)"
                   rows={8}
-                  maxLength={10000}
+                  maxLength={50000}
                 />
                 <p className="text-sm text-gray-500">
-                  {formData.theory.length}/10000 символов
+                  {formData.theory.length}/50000 символов
                 </p>
                 </div>
               </CardContent>
@@ -283,10 +293,10 @@ export default function NewLabPage() {
                   onChange={(e) => handleInputChange('process', e.target.value)}
                   placeholder="1. Жабдықтарды дайындаңыз... (міндетті емес)"
                   rows={8}
-                  maxLength={10000}
+                  maxLength={50000}
                 />
                 <p className="text-sm text-gray-500">
-                  {formData.process.length}/10000 символов
+                  {formData.process.length}/50000 символов
                 </p>
                 </div>
               </CardContent>
@@ -298,9 +308,9 @@ export default function NewLabPage() {
             {/* Изображения для карточки */}
             <Card>
               <CardHeader>
-                <CardTitle>Карточка суреті</CardTitle>
+                <CardTitle>Карточка суреті (міндетті емес)</CardTitle>
                 <CardDescription>
-                  Карточкада көрсетілетін суреттерді жүктеңіз
+                  Карточкада көрсетілетін суреттерді жүктеңіз. Бұл өріс міндетті емес.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -319,9 +329,9 @@ export default function NewLabPage() {
             {/* Внешние ссылки */}
             <Card>
               <CardHeader>
-                <CardTitle>Сыртқы сілтемелер</CardTitle>
+                <CardTitle>Сыртқы сілтемелер (міндетті емес)</CardTitle>
                 <CardDescription>
-                  Қосымша ресурстарға сілтемелер қосыңыз
+                  Қосымша ресурстарға сілтемелер қосыңыз. Бұл өріс міндетті емес.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -330,7 +340,6 @@ export default function NewLabPage() {
                     value={externalLink}
                     onChange={(e) => setExternalLink(e.target.value)}
                     placeholder="https://example.com"
-                    maxLength={500}
                   />
                   <Button type="button" onClick={handleAddExternalLink}>
                     Қосу
@@ -338,7 +347,7 @@ export default function NewLabPage() {
                 </div>
                 
                 <p className="text-sm text-gray-500">
-                  Ссылок: {formData.external_links.length}/10
+                  Ссылок: {formData.external_links.length} (можно не добавлять)
                 </p>
                 
                 {formData.external_links.length > 0 && (
