@@ -22,12 +22,13 @@ interface StudentMaterial {
 }
 
 interface StudentMaterialPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default function StudentMaterialPage({ params }: StudentMaterialPageProps) {
+export default async function StudentMaterialPage({ params }: StudentMaterialPageProps) {
+  const { id } = await params
   const router = useRouter()
   const [material, setMaterial] = useState<StudentMaterial | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,7 +39,7 @@ export default function StudentMaterialPage({ params }: StudentMaterialPageProps
         // Здесь будет запрос к Supabase для получения конкретного материала
         // Пока используем заглушку
         const mockMaterial: StudentMaterial = {
-          id: params.id,
+          id: id,
           title: 'Биология негіздері',
           description: 'Жасуша құрылымы және функциялары туралы негізгі түсініктер. Бұл материалда сіз жасушаның құрылымы, органеллалары және олардың функциялары туралы білесіз.',
           theory: 'Жасуша - бұл тірі организмдердің негізгі құрылымдық және функционалдық бірлігі. Жасушалардың екі негізгі түрі бар: прокариоттық және эукариоттық жасушалар.\n\n**Прокариоттық жасушалар:**\n- Ядро мембранасы жоқ\n- ДНК цитоплазмада орналасқан\n- Мысалы: бактериялар\n\n**Эукариоттық жасушалар:**\n- Ядро мембранасы бар\n- ДНК ядро ішінде орналасқан\n- Мысалы: өсімдіктер, жануарлар, адам',
@@ -67,7 +68,7 @@ export default function StudentMaterialPage({ params }: StudentMaterialPageProps
     }
 
     fetchMaterial()
-  }, [params.id])
+  }, [id])
 
   const handleDownload = (filename: string) => {
     // Здесь будет логика скачивания файла

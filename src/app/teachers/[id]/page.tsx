@@ -158,7 +158,7 @@ export default function TeacherDetailPage() {
               <div 
                 className="prose prose-sm max-w-none break-words"
                 dangerouslySetInnerHTML={{ 
-                  __html: material.theory.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                  __html: material.theory?.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>') || ''
                 }}
               />
             </CardContent>
@@ -172,8 +172,8 @@ export default function TeacherDetailPage() {
             <CardContent>
               <div 
                 className="prose prose-sm max-w-none break-words"
-                dangerouslySetInnerHTML={{ 
-                  __html: material.process.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                dangerouslySetInnerHTML={{
+                  __html: material.process?.replace(/\n/g, '<br>').replace(/# (.*)/g, '<h1>$1</h1>').replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>') || ''
                 }}
               />
             </CardContent>
@@ -212,7 +212,7 @@ export default function TeacherDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {material.files.map((file, index) => (
+                  {material.files?.map((file, index) => (
                     <Button
                       key={index}
                       variant="outline"

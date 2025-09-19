@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileUploadComponent } from '@/components/ui/file-upload'
+import { FileUpload } from '@/types'
 import { ArrowLeft, Save } from 'lucide-react'
 
 export default function NewTeacherMaterialPage() {
@@ -19,8 +20,8 @@ export default function NewTeacherMaterialPage() {
   const router = useRouter()
   const { createMaterial } = useTeachersMaterials()
   const [loading, setLoading] = useState(false)
-  const [files, setFiles] = useState<Array<{ file: File; status: 'pending' | 'uploading' | 'completed' | 'error'; url?: string; name: string }>>([])
-  const [cardImages, setCardImages] = useState<Array<{ file: File; status: 'pending' | 'uploading' | 'completed' | 'error'; url?: string; name: string }>>([])
+  const [files, setFiles] = useState<FileUpload[]>([])
+  const [cardImages, setCardImages] = useState<FileUpload[]>([])
   
   const [formData, setFormData] = useState({
     title: '',
@@ -64,8 +65,8 @@ export default function NewTeacherMaterialPage() {
         title: formData.title,
         description: formData.description,
         class_level: parseInt(formData.class_level),
-        image_url: cardImages.length > 0 ? cardImages[0].url : null,
-        files: files.map(f => f.url).filter(Boolean)
+        image_url: cardImages.length > 0 ? cardImages[0].url : undefined,
+        files: files.map(f => f.url).filter((url): url is string => Boolean(url))
       }
 
       console.log('Saving teacher material:', materialData)

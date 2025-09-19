@@ -55,7 +55,7 @@ export function useLabs() {
             )
 
       try {
-        const result = await Promise.race([insertPromise, timeoutPromise])
+        const result = await Promise.race([insertPromise, timeoutPromise]) as { data: any; error: any }
         const { data, error } = result
 
         const endTime = Date.now()

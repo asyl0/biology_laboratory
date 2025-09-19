@@ -50,14 +50,6 @@ export function useSteam() {
         .insert([materialData])
         .select()
         .single()
-        .then(result => {
-          console.log('Insert promise resolved:', result)
-          return result
-        })
-        .catch(error => {
-          console.log('Insert promise rejected:', error)
-          throw error
-        })
       
       console.log('Insert promise created, starting race...')
 
@@ -67,7 +59,7 @@ export function useSteam() {
 
       try {
         console.log('Starting Promise.race...')
-        const result = await Promise.race([insertPromise, timeoutPromise])
+        const result = await Promise.race([insertPromise, timeoutPromise]) as { data: any; error: any }
         console.log('Promise.race completed, result:', result)
         const { data, error } = result
 
