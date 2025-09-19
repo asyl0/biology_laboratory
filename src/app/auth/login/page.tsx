@@ -61,39 +61,39 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-background to-accent-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 animate-fade-in">
         {/* Header */}
         <div className="text-center">
-          <div className="flex justify-center">
-            <FlaskConical className="h-12 w-12 text-primary" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary to-primary-600 rounded-2xl shadow-2xl mb-6 animate-bounce-in">
+            <FlaskConical className="h-10 w-10 text-primary-foreground" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="text-4xl font-bold text-gradient mb-4">
             Вход в систему
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="text-muted-foreground text-lg">
             Войдите в свой аккаунт для доступа к материалам
           </p>
         </div>
 
         {/* Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Авторизация</CardTitle>
-            <CardDescription>
+        <Card className="shadow-2xl border-border/50">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Авторизация</CardTitle>
+            <CardDescription className="text-base">
               Введите свои данные для входа в систему
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm font-medium">
                   {error}
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-base font-semibold">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -102,11 +102,12 @@ export default function LoginPage() {
                   placeholder="your@email.com"
                   autoComplete="email"
                   required
+                  className="h-12 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Пароль</Label>
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-base font-semibold">Пароль</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -116,6 +117,7 @@ export default function LoginPage() {
                     placeholder="Введите пароль"
                     autoComplete="current-password"
                     required
+                    className="h-12 text-base pr-12"
                   />
                   <Button
                     type="button"
@@ -125,25 +127,25 @@ export default function LoginPage() {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </Button>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full h-12 text-base btn-hover" disabled={loading}>
                 {loading ? 'Вход...' : 'Войти'}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+            <div className="mt-8 text-center">
+              <p className="text-muted-foreground">
                 Нет аккаунта?{' '}
                 <a
                   href="/auth/register"
-                  className="font-medium text-primary hover:text-primary/80"
+                  className="font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
                 >
                   Зарегистрироваться
                 </a>

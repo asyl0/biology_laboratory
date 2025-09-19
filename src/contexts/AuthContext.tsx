@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Слушаем изменения аутентификации
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
         setSession(session)
         setUser(session?.user ?? null)
         
@@ -50,6 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         setLoading(false)
+        
+        // При выходе принудительно обновляем страницу
+        if (event === 'SIGNED_OUT') {
+          window.location.href = '/'
+        }
       }
     )
 
@@ -76,7 +82,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+      // Принудительно очищаем состояние
+      setUser(null)
+      setSession(null)
+      setRole(null)
+    } catch (error) {
+      console.error('Error signing out:', error)
+      throw error
+    }
   }
 
   const value = {

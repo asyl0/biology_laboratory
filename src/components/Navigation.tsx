@@ -47,10 +47,6 @@ export function Navigation() {
 
   const adminItems = [
     { href: '/admin', label: 'Админ', icon: Settings },
-    { href: '/admin/labs', label: 'Зертханалық жұмыстар', icon: FlaskConical },
-    { href: '/admin/steam', label: 'STEAM материалдары', icon: Atom },
-    { href: '/admin/teachers', label: 'Мұғалім материалдары', icon: GraduationCap },
-    { href: '/admin/students', label: 'Оқушы материалдары', icon: GraduationCap },
   ]
 
   // Закрытие dropdown при клике вне его
@@ -72,21 +68,22 @@ export function Navigation() {
       await signOut()
       setIsOpen(false)
       setIsUserMenuOpen(false)
-      router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)
     }
   }
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-background/80 backdrop-blur-md shadow-lg border-b border-border/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Логотип */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <FlaskConical className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">BioLab</span>
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="p-2 rounded-xl bg-gradient-to-r from-primary to-primary-600 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <FlaskConical className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <span className="text-2xl font-bold text-gradient">BioLab</span>
             </Link>
           </div>
 
@@ -98,27 +95,27 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-foreground hover:text-primary hover:bg-accent/50 transition-all duration-200 group"
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               )
             })}
             
             {role === 'admin' && (
-              <div className="flex items-center space-x-4 pl-4 border-l">
-                <span className="text-sm text-gray-500">Админ:</span>
+              <div className="flex items-center space-x-4 pl-6 border-l border-border/50">
+                <span className="text-sm font-medium text-muted-foreground">Админ:</span>
                 {adminItems.map((item) => {
                   const Icon = item.icon
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors"
+                      className="flex items-center space-x-2 px-3 py-2 rounded-lg text-foreground hover:text-primary hover:bg-accent/50 transition-all duration-200 group"
                     >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.label}</span>
+                      <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                      <span className="font-medium text-sm">{item.label}</span>
                     </Link>
                   )
                 })}
@@ -135,26 +132,28 @@ export function Navigation() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-primary"
+                  className="flex items-center space-x-2 text-foreground hover:text-primary hover:bg-accent/50 px-4 py-2 rounded-lg"
                 >
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:block">{user.email}</span>
-                  <ChevronDown className="h-4 w-4" />
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-primary-600 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                  <span className="hidden sm:block font-medium">{user.email}</span>
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200" />
                 </Button>
 
                 {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border z-50">
-                    <div className="py-1">
+                  <div className="absolute right-0 mt-2 w-64 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 z-50 animate-fade-in">
+                    <div className="py-2">
                       {/* User Info */}
-                      <div className="px-4 py-3 border-b">
+                      <div className="px-4 py-4 border-b border-border/50">
                         <div className="flex items-center space-x-3">
-                          <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
-                            <User className="h-4 w-4 text-primary" />
+                          <div className="h-10 w-10 bg-gradient-to-r from-primary to-primary-600 rounded-full flex items-center justify-center shadow-lg">
+                            <User className="h-5 w-5 text-primary-foreground" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{user.email}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-sm font-semibold text-card-foreground">{user.email}</p>
+                            <p className="text-xs text-muted-foreground">
                               {role === 'admin' ? t('common.admin') : role === 'teacher' ? t('common.teacher') : t('common.student')}
                             </p>
                           </div>
@@ -164,17 +163,17 @@ export function Navigation() {
                       {/* Logout Button */}
                       <button
                         onClick={handleSignOut}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                        className="w-full px-4 py-3 text-left text-sm text-card-foreground hover:bg-destructive/10 hover:text-destructive flex items-center space-x-3 transition-all duration-200"
                       >
                         <LogOut className="h-4 w-4" />
-                        <span>{t('common.logout')}</span>
+                        <span className="font-medium">{t('common.logout')}</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Button variant="outline" size="sm" asChild>
                   <Link href="/auth/login">{t('common.login')}</Link>
                 </Button>
@@ -188,7 +187,7 @@ export function Navigation() {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="md:hidden hover:bg-accent/50"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -198,39 +197,39 @@ export function Navigation() {
 
         {/* Мобильное меню */}
         {isOpen && (
-          <div className="md:hidden">
-            <Card className="mt-2 p-4">
-              <div className="space-y-4">
+          <div className="md:hidden animate-slide-in">
+            <Card className="mt-4 p-6 bg-card/95 backdrop-blur-md">
+              <div className="space-y-6">
                 {getNavigationItems().map((item) => {
                   const Icon = item.icon
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center space-x-3 text-gray-700 hover:text-primary transition-colors"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg text-foreground hover:text-primary hover:bg-accent/50 transition-all duration-200 group"
                       onClick={() => setIsOpen(false)}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.label}</span>
+                      <Icon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                      <span className="font-medium">{item.label}</span>
                     </Link>
                   )
                 })}
                 
                 {role === 'admin' && (
                   <>
-                    <div className="border-t pt-4">
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Админ</h3>
+                    <div className="border-t border-border/50 pt-6">
+                      <h3 className="text-sm font-semibold text-muted-foreground mb-4 px-2">Админ панель</h3>
                       {adminItems.map((item) => {
                         const Icon = item.icon
                         return (
                           <Link
                             key={item.href}
                             href={item.href}
-                            className="flex items-center space-x-3 text-gray-700 hover:text-primary transition-colors ml-4"
+                            className="flex items-center space-x-3 px-4 py-3 rounded-lg text-foreground hover:text-primary hover:bg-accent/50 transition-all duration-200 group ml-2"
                             onClick={() => setIsOpen(false)}
                           >
-                            <Icon className="h-4 w-4" />
-                            <span>{item.label}</span>
+                            <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                            <span className="font-medium text-sm">{item.label}</span>
                           </Link>
                         )
                       })}
@@ -239,19 +238,23 @@ export function Navigation() {
                 )}
 
                 {user && (
-                  <div className="border-t pt-4">
-                    <div className="flex items-center space-x-3 text-sm text-gray-700 mb-2">
-                      <User className="h-4 w-4" />
-                      <span>{user.email}</span>
-                      <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                        {role === 'admin' ? 'Админ' : role === 'teacher' ? 'Учитель' : 'Ученик'}
-                      </span>
+                  <div className="border-t border-border/50 pt-6">
+                    <div className="flex items-center space-x-3 px-2 mb-4">
+                      <div className="h-8 w-8 bg-gradient-to-r from-primary to-primary-600 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-card-foreground">{user.email}</p>
+                        <span className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                          {role === 'admin' ? 'Админ' : role === 'teacher' ? 'Учитель' : 'Ученик'}
+                        </span>
+                      </div>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleSignOut}
-                      className="w-full"
+                      className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       {t('common.logout')}
